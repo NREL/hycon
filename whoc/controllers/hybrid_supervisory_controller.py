@@ -26,12 +26,12 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         self._has_wind_controller = wind_controller is not None
         self._has_battery_controller = battery_controller is not None
 
-        # Must provide a controller for one type of generation
-        if not self._has_wind_controller and not self._has_solar_controller:
-            raise ValueError(
-                "The HybridSupervisoryControllerBaseline requires that either a solar_controller"
-                " or a wind_controller be provided."
-            )
+        # # Must provide a controller for one type of generation
+        # if not self._has_wind_controller and not self._has_solar_controller:
+        #     raise ValueError(
+        #         "The HybridSupervisoryControllerBaseline requires that either a solar_controller"
+        #         " or a wind_controller be provided."
+        #     )
 
         # Initialize Power references
         self.wind_reference = 0

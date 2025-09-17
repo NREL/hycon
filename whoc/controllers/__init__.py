@@ -1,4 +1,8 @@
-from whoc.controllers.battery_controller import BatteryController, BatteryPassthroughController
+from whoc.controllers.battery_controller import (
+    BatteryController,
+    BatteryPassthroughController,
+    BatteryPriceSOCController,
+)
 from whoc.controllers.hybrid_supervisory_controller import (
     HybridSupervisoryControllerBaseline,
     HybridSupervisoryControllerMultiRef,

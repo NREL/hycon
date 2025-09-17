@@ -51,37 +51,38 @@ def test_BatteryPriceSOCController_compute_controls():
     test_controller.low_soc_price = 0.0
     test_controller.low_soc = 0.2
 
-    # Test the high soc condition when lmp_rt is above discharge price
-    # but below the high_soc_price
+    # Test the high soc condition when lmp_rt is below the charge price
+    # but above the low_soc_price
     measurement_dict = {
         "battery_soc": 0.9,
-        "lmp_rt": 24,
+        "lmp_rt": 5,
         "discharge_price": 20,
         "charge_price": 10,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
 
-    # Test when lmp_rt is above high_soc_price
+    # Test the high soc condition when lmp_rt is below the low_soc_price
     measurement_dict = {
         "battery_soc": 0.9,
-        "lmp_rt": 26,
+        "lmp_rt": -5,
         "discharge_price": 20,
         "charge_price": 10,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
-    assert controls_dict["power_setpoint"] == test_controller.rated_power_discharging
+    assert controls_dict["power_setpoint"] == -1 * test_controller.rated_power_charging
 
-    # Test when lmp_rt is above the charge price and below the high_soc
+    # Test when soc is below the high_loc and lmp_rt is below the charge price
+    # and above the low_soc_price (shouldn't matter)
     measurement_dict = {
         "battery_soc": 0.7,
-        "lmp_rt": 22,
+        "lmp_rt": 5,
         "discharge_price": 20,
         "charge_price": 10,
     }
-
     controls_dict = test_controller.compute_controls(measurement_dict)
-    assert controls_dict["power_setpoint"] == test_controller.rated_power_discharging
+    assert controls_dict["power_setpoint"] == -1 * test_controller.rated_power_charging
+
 
     # Test when lmp_rt is in between the charge and discharge price
     measurement_dict = {
@@ -93,32 +94,33 @@ def test_BatteryPriceSOCController_compute_controls():
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
 
-    # Test when soc is above the low_soc, and lmp_rt is below the charge price
+    # Test when the soc is above the low_soc and lmp_rt is above the discharge price
     measurement_dict = {
-        "battery_soc": 0.25,
-        "lmp_rt": 5,
+        "battery_soc": 0.3,
+        "lmp_rt": 25,
         "discharge_price": 20,
         "charge_price": 10,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
-    assert controls_dict["power_setpoint"] == -1 * test_controller.rated_power_charging
+    assert controls_dict["power_setpoint"] == test_controller.rated_power_discharging
 
-    # Test when soc is below the low_soc, and lmp_rt is below the charge price but above the low_soc_price
+    # Test when the soc is below the low_soc and lmp_rt is above the discharge price
+    # But below the high_soc_price (should prevent discharge)
     measurement_dict = {
         "battery_soc": 0.1,
-        "lmp_rt": 15,
+        "lmp_rt": 22,
         "discharge_price": 20,
         "charge_price": 10,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
-    assert controls_dict["power_setpoint"] == 0
+    assert controls_dict["power_setpoint"] == 0.0
 
-    # Test when soc is below the low_soc, and lmp_rt is below the low_soc_price
+    # Test when the soc is below the low_soc and lmp_rt is above the high_soc_price
     measurement_dict = {
         "battery_soc": 0.1,
-        "lmp_rt": -5,
+        "lmp_rt": 26,
         "discharge_price": 20,
         "charge_price": 10,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
-    assert controls_dict["power_setpoint"] == -1 * test_controller.rated_power_charging
+    assert controls_dict["power_setpoint"] == test_controller.rated_power_discharging

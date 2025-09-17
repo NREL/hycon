@@ -158,9 +158,9 @@ class BatteryPriceSOCController(ControllerBase):
 
         # For now hard code certain set points
         self.high_soc_price = 25 # $/MWh
-        self.high_soc = 0.8 # Above this SOC, only discharge if price is higher than high_soc_price
+        self.high_soc = 0.8 # Above this SOC, only charge if price is lower than low_soc_price
         self.low_soc_price = 0 # $/MWh
-        self.low_soc = 0.2 # Below this SOC, only charge if price is lower than low_soc_price
+        self.low_soc = 0.2 # Below this SOC, only discharge if price is higher than high_soc_price
 
         self.rated_power_charging = input_dict["battery"]["charge_rate"] * 1e3
         self.rated_power_discharging = input_dict["battery"]["discharge_rate"] * 1e3
@@ -178,14 +178,14 @@ class BatteryPriceSOCController(ControllerBase):
         # Note that the convention is followed where charging is negative power
         # This matches what is in place in the hercules/hybrid_plant level and 
         # will be inverted before passing into the battery modules
-        if (soc <= self.high_soc) and (lmp_rt > discharge_price):
-            power_reference = self.rated_power_discharging
-        elif (soc > self.high_soc) and (lmp_rt > self.high_soc_price):
-            power_reference = self.rated_power_discharging
-        elif (soc >= self.low_soc) and (lmp_rt < charge_price):
+        if (soc <= self.high_soc) and (lmp_rt <= charge_price):
             power_reference = -1 * self.rated_power_charging
-        elif (soc < self.low_soc) and (lmp_rt < self.low_soc_price):
+        elif (soc > self.high_soc) and (lmp_rt <= self.low_soc_price):
             power_reference = -1 * self.rated_power_charging
+        elif (soc >= self.low_soc) and (lmp_rt >= discharge_price):
+            power_reference = self.rated_power_discharging
+        elif (soc < self.low_soc) and (lmp_rt >= self.high_soc_price):
+            power_reference = self.rated_power_discharging
 
 
 

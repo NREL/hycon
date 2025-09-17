@@ -69,6 +69,18 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
                 "battery_power": measurements_dict["battery_power"],
                 "battery_soc": measurements_dict["battery_soc"]
             }
+
+            # Additional information used by certain controllers
+            if "lmp_rt" in measurements_dict:
+                battery_measurements_dict["lmp_rt"] = measurements_dict["lmp_rt"]
+            if "lmp_da" in measurements_dict:
+                battery_measurements_dict["lmp_da"] = measurements_dict["lmp_da"]
+            if "discharge_price" in measurements_dict:
+                battery_measurements_dict["discharge_price"] = measurements_dict["discharge_price"]
+            if "charge_price" in measurements_dict:
+                battery_measurements_dict["charge_price"] = measurements_dict["charge_price"]
+
+   
             battery_controls_dict = self.battery_controller.compute_controls(
                 battery_measurements_dict
             )

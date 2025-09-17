@@ -182,6 +182,23 @@ class HerculesHybridLongRunInterface(HerculesInterfaceBase):
                     "battery_power_reference"
                 ]
 
+            if "discharge_price" in h_dict["external_signals"]:
+                measurements["discharge_price"] = h_dict["external_signals"][
+                    "discharge_price"
+                ]
+            if "charge_price" in h_dict["external_signals"]:
+                measurements["charge_price"] = h_dict["external_signals"][
+                    "charge_price"
+                ]
+            if "lmp_rt" in h_dict["external_signals"]:
+                measurements["lmp_rt"] = h_dict["external_signals"][
+                    "lmp_rt"
+                ]
+            if "lmp_da" in h_dict["external_signals"]:
+                measurements["lmp_da"] = h_dict["external_signals"][
+                    "lmp_da"
+                ]
+
             for k in h_dict["external_signals"].keys():
                 if "forecast" in k != "wind_power_reference":
                     forecast[k] = h_dict["external_signals"][k]

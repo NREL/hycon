@@ -172,6 +172,9 @@ class BatteryPriceSOCController(ControllerBase):
         discharge_price = measurements_dict["discharge_price"]
         lmp_rt = measurements_dict["lmp_rt"]
 
+        # In this controller, the battery reference acts as an upper bound
+        curtailment_limit = measurements_dict["battery_power_reference"]
+
         
         power_reference = 0
 
@@ -187,6 +190,7 @@ class BatteryPriceSOCController(ControllerBase):
         elif (soc < self.low_soc) and (lmp_rt >= self.high_soc_price):
             power_reference = self.rated_power_discharging
 
+        power_reference = min(curtailment_limit,power_reference)
 
 
         return {"power_setpoint":power_reference}

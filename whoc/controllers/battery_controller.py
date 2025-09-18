@@ -173,7 +173,7 @@ class BatteryPriceSOCController(ControllerBase):
         lmp_rt = measurements_dict["lmp_rt"]
 
         # In this controller, the battery reference acts as an upper bound
-        curtailment_limit = measurements_dict["battery_power_reference"]
+        curtailment_limit = measurements_dict["power_reference"]
 
         
         power_reference = 0

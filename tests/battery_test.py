@@ -19,6 +19,7 @@ test_hercules_dict = {
         "charge_price": 0.0,
         "discharge_price": 25.0,
         "lmp_rt": 10.0,
+        "battery_power_reference": 1000.0,
     },
 }
 
@@ -58,6 +59,7 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": 5,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 100000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
@@ -68,6 +70,7 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": -5,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 100000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == -1 * test_controller.rated_power_charging
@@ -79,6 +82,7 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": 5,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 100000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == -1 * test_controller.rated_power_charging
@@ -90,6 +94,7 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": 15,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 100000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
@@ -100,6 +105,7 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": 25,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 100000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == test_controller.rated_power_discharging
@@ -111,6 +117,7 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": 22,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 1000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
@@ -121,6 +128,18 @@ def test_BatteryPriceSOCController_compute_controls():
         "lmp_rt": 26,
         "discharge_price": 20,
         "charge_price": 10,
+        "battery_power_reference": 100000.0,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == test_controller.rated_power_discharging
+
+    # Test the ability of battery reference to limit the power setpoint
+    measurement_dict = {
+        "battery_soc": 0.1,
+        "lmp_rt": 26,
+        "discharge_price": 20,
+        "charge_price": 10,
+        "battery_power_reference": 777.0,
+    }
+    controls_dict = test_controller.compute_controls(measurement_dict)
+    assert controls_dict["power_setpoint"] == 777.0

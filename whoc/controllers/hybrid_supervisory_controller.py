@@ -26,12 +26,17 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         self._has_wind_controller = wind_controller is not None
         self._has_battery_controller = battery_controller is not None
 
-        # # Must provide a controller for one type of generation
-        # if not self._has_wind_controller and not self._has_solar_controller:
-        #     raise ValueError(
-        #         "The HybridSupervisoryControllerBaseline requires that either a solar_controller"
-        #         " or a wind_controller be provided."
-        #     )
+        # Must provide a controller for one type of generation if using Baseline directly
+        # TODO: This feels like an example of 'bad' inheritance(?).
+        if (
+            type(self) is HybridSupervisoryControllerBaseline
+            and not self._has_wind_controller
+            and not self._has_solar_controller
+        ):
+            raise ValueError(
+                "The HybridSupervisoryControllerBaseline requires that either a solar_controller"
+                " or a wind_controller be provided."
+            )
 
         # Initialize Power references
         self.wind_reference = 0
@@ -206,8 +211,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBaseline):
 
         # Extract interconnection limit
         if "interconnect_limit" in self.plant_parameters:
-            if self.plant_parameters["interconnect_limit"] <= 0:
-                raise ValueError("interconnect_limit must be positive.")
+            if (not isinstance(self.plant_parameters["interconnect_limit"], (float, int))
+                or self.plant_parameters["interconnect_limit"] <= 0):
+                raise ValueError("interconnect_limit must be a positive value.")
         else:
             raise KeyError("interconnect_limit must be specified to use this controller.")
 

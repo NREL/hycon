@@ -168,13 +168,13 @@ class BatteryPriceSOCController(ControllerBase):
 
     def compute_controls(self, measurements_dict):
 
-        soc = measurements_dict["battery_soc"]
-        charge_price = measurements_dict["charge_price"]
-        discharge_price = measurements_dict["discharge_price"]
-        lmp_rt = measurements_dict["lmp_rt"]
+        soc = measurements_dict["battery"]["state_of_charge"]
+        charge_price = measurements_dict["battery"]["charge_price"]
+        discharge_price = measurements_dict["battery"]["discharge_price"]
+        lmp_rt = measurements_dict["battery"]["lmp_rt"]
 
         # In this controller, the battery reference acts as an upper bound
-        curtailment_limit = measurements_dict["power_reference"]
+        curtailment_limit = measurements_dict["battery"]["power_reference"]
 
         
         power_reference = 0
@@ -194,4 +194,4 @@ class BatteryPriceSOCController(ControllerBase):
         power_reference = min(curtailment_limit,power_reference)
 
 
-        return {"power_setpoint":power_reference}
+        return {"power_setpoint": power_reference}

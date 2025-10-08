@@ -110,19 +110,19 @@ def test_HerculesHybridLongRunInterface():
     # Test instantiation
     interface = HerculesHybridLongRunInterface(h_dict=test_hercules_dict)
     assert interface.dt == test_hercules_dict["dt"]
-    assert interface.plant_parameters["wind_capacity"] == (
+    assert interface.plant_parameters["wind_farm"]["capacity"] == (
         test_hercules_dict["wind_farm"]["capacity"]
     )
-    assert interface.plant_parameters["solar_capacity"] == (
+    assert interface.plant_parameters["solar_farm"]["capacity"] == (
         test_hercules_dict["solar_farm"]["capacity"]
     )
-    assert interface.plant_parameters["battery_power_capacity"] == (
+    assert interface.plant_parameters["battery"]["power_capacity"] == (
         test_hercules_dict["battery"]["size"]
     )
-    assert interface.plant_parameters["battery_energy_capacity"] == (
+    assert interface.plant_parameters["battery"]["energy_capacity"] == (
         test_hercules_dict["battery"]["energy_capacity"]
     )
-    assert interface.plant_parameters["n_turbines"] == (
+    assert interface.plant_parameters["wind_farm"]["n_turbines"] == (
         test_hercules_dict["wind_farm"]["n_turbines"]
     )
 
@@ -130,14 +130,16 @@ def test_HerculesHybridLongRunInterface():
     measurements = interface.get_measurements(h_dict=test_hercules_dict)
     assert measurements["time"] == test_hercules_dict["time"]
     assert (
-        measurements["wind_directions"] == [test_hercules_dict["wind_farm"]["wind_direction"]] * 2
+        measurements["wind_farm"]["wind_directions"]
+        == [test_hercules_dict["wind_farm"]["wind_direction"]] * 2
     )
     assert (
-        measurements["wind_turbine_powers"] == test_hercules_dict["wind_farm"]["turbine_powers"]
+        measurements["wind_farm"]["turbine_powers"]
+        == test_hercules_dict["wind_farm"]["turbine_powers"]
     )
-    assert measurements["solar_power"] == test_hercules_dict["solar_farm"]["power"]
-    assert measurements["battery_power"] == test_hercules_dict["battery"]["power"]
-    assert measurements["battery_soc"] == test_hercules_dict["battery"]["soc"]
+    assert measurements["solar_farm"]["power"] == test_hercules_dict["solar_farm"]["power"]
+    assert measurements["battery"]["power"] == test_hercules_dict["battery"]["power"]
+    assert measurements["battery"]["state_of_charge"] == test_hercules_dict["battery"]["soc"]
 
     # Test check_controls()
     controls_dict = {

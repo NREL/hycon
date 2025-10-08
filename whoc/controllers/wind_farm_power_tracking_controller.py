@@ -14,7 +14,11 @@ class WindFarmPowerDistributingController(ControllerBase):
         super().__init__(interface, verbose=verbose)
 
         # Pull plant parameters for ease of use
-        self.n_turbines = self.plant_parameters["n_turbines"]
+        # TODO: Can I more cleverly access the lower-lever plant_parameters["wind_farm"]?
+        if "wind_farm" in self.plant_parameters:
+            self.n_turbines = self.plant_parameters["wind_farm"]["n_turbines"]
+        else:
+            self.n_turbines = self.plant_parameters["n_turbines"]
         self.turbines = range(self.n_turbines)
 
     def compute_controls(self, measurements_dict):
@@ -25,7 +29,7 @@ class WindFarmPowerDistributingController(ControllerBase):
         
         return self.turbine_power_references(
             farm_power_reference=farm_power_reference,
-            turbine_powers=measurements_dict["wind_turbine_powers"]
+            turbine_powers=measurements_dict["turbine_powers"]
         )
 
     def turbine_power_references(
@@ -44,7 +48,7 @@ class WindFarmPowerDistributingController(ControllerBase):
 
         # Split farm power reference among turbines.
         controls_dict = {
-            "wind_power_setpoints": [farm_power_reference/self.n_turbines]*self.n_turbines,
+            "power_setpoints": [farm_power_reference/self.n_turbines]*self.n_turbines,
         }
 
         return controls_dict
@@ -133,7 +137,7 @@ class WindFarmPowerTrackingController(WindFarmPowerDistributingController):
         turbine_power_setpoints = np.array(turbine_powers) + delta_P_ref
 
         controls_dict = {
-            "wind_power_setpoints": list(turbine_power_setpoints),
+            "power_setpoints": list(turbine_power_setpoints),
         }
 
         # Store error, control (only needed for integral action, which is disabled)

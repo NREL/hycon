@@ -48,8 +48,8 @@ class HerculesADInterface(InterfaceBase):
             "time": time,
             "wind_directions": wind_directions,
             # "wind_speeds":wind_speeds,
-            "wind_turbine_powers": turbine_powers,
-            "wind_power_reference": wind_power_reference,
+            "turbine_powers": turbine_powers,
+            "power_reference": wind_power_reference,
             "forecast": forecast,
             "total_power": sum(turbine_powers),
         }
@@ -57,7 +57,7 @@ class HerculesADInterface(InterfaceBase):
         return measurements
 
     def check_controls(self, controls_dict):
-        available_controls = ["yaw_angles", "wind_power_setpoints"]
+        available_controls = ["yaw_angles", "power_setpoints"]
 
         for k in controls_dict.keys():
             if k not in available_controls:
@@ -67,16 +67,16 @@ class HerculesADInterface(InterfaceBase):
                     "Length of setpoint " + k + " does not match the number of turbines."
                 )
 
-    def send_controls(self, hercules_dict, yaw_angles=None, wind_power_setpoints=None):
+    def send_controls(self, hercules_dict, yaw_angles=None, power_setpoints=None):
         if yaw_angles is None:
             yaw_angles = [-1000] * self.n_turbines
-        if wind_power_setpoints is None:
-            wind_power_setpoints = [POWER_SETPOINT_DEFAULT] * self.n_turbines
+        if power_setpoints is None:
+            power_setpoints = [POWER_SETPOINT_DEFAULT] * self.n_turbines
 
         hercules_dict["hercules_comms"]["amr_wind"][self.wf_name]["turbine_yaw_angles"] = yaw_angles
         hercules_dict["hercules_comms"]["amr_wind"][self.wf_name][
             "turbine_power_setpoints"
-        ] = wind_power_setpoints
+        ] = power_setpoints
 
         return hercules_dict
 
@@ -103,9 +103,9 @@ class HerculesHybridADInterface(InterfaceBase):
             if tech_keys[1] in i.split('_'):
                 self.battery_name = [ps for ps in py_sims if "battery" in ps][0]
                 self._has_battery_component = True
-                self.plant_parameters["battery_charge_rate"] = (
-                    hercules_dict["py_sims"][self.battery_name]["charge_rate"]*1000
-                ) # Convert to kW
+                self.plant_parameters["battery"] = {
+                    "charge_rate":hercules_dict["py_sims"][self.battery_name]["charge_rate"]*1000
+                 } # Convert to kW
             if tech_keys[3] in i.split("_"):
                 self.hydrogen_name = [ps for ps in py_sims if "hydrogen" in ps][0]
                 self._has_hydrogen_component = True
@@ -116,7 +116,9 @@ class HerculesHybridADInterface(InterfaceBase):
                 self.n_turbines = hercules_dict["controller"]["num_turbines"]
                 self.turbines = range(self.n_turbines)
                 self._has_wind_component = True
-                self.plant_parameters["n_turbines"] = self.n_turbines
+                self.plant_parameters["wind_farm"] = {
+                    "n_turbines": self.n_turbines
+                }
 
     def get_measurements(self, hercules_dict):
 
@@ -147,37 +149,41 @@ class HerculesHybridADInterface(InterfaceBase):
             turbine_powers = (
                 hercules_dict["hercules_comms"]["amr_wind"][self.wind_name]["turbine_powers"]
             )
-            measurements["wind_turbine_powers"] =  turbine_powers
-            measurements["wind_speed"] =  \
-                hercules_dict["hercules_comms"]["amr_wind"][self.wind_name]["wind_speed"]
+            measurements["wind_farm"] = {
+                "turbine_powers": turbine_powers,
+                "wind_speed": hercules_dict["hercules_comms"]["amr_wind"][self.wind_name]\
+                    ["wind_speed"]
+            }
             total_power += sum(turbine_powers)
         if self._has_solar_component:
             # solar_power converted to kW here
             # solar_dni is the direct normal irradiance
             # solar_aoi is the 
-            measurements["solar_power"]= \
-                hercules_dict["py_sims"][self.solar_name]["outputs"]["power_mw"] * 1000
-            measurements["solar_dni"]= \
-                hercules_dict["py_sims"][self.solar_name]["outputs"]["dni"]
-            measurements["solar_aoi"]= \
-                hercules_dict["py_sims"][self.solar_name]["outputs"]["aoi"]
-            total_power += measurements["solar_power"]
+            measurements["solar_farm"] = {
+                "power": hercules_dict["py_sims"][self.solar_name]["outputs"]["power_mw"] * 1000,
+                "direct_normal_irradiance": hercules_dict["py_sims"][self.solar_name]["outputs"]\
+                    ["dni"],
+                "angle_of_incidence": hercules_dict["py_sims"][self.solar_name]["outputs"]["aoi"],
+            }
+            total_power += measurements["solar_farm"]["power"]
         if self._has_battery_component:
-            measurements["battery_power"]= \
-                -hercules_dict["py_sims"][self.battery_name]["outputs"]["power"]
-            measurements["battery_soc"]= \
-                hercules_dict["py_sims"][self.battery_name]["outputs"]["soc"]
-            total_power += measurements["battery_power"]
+            measurements["battery"] = {
+                "power": -hercules_dict["py_sims"][self.battery_name]["outputs"]["power"],
+                "state_of_charge": hercules_dict["py_sims"][self.battery_name]["outputs"]["soc"],
+            }
+            total_power += measurements["battery"]["power"]
         if self._has_hydrogen_component:
             # hydrogen production rate in kg/s
-            measurements["hydrogen_production_rate"]= \
-                hercules_dict["py_sims"][self.hydrogen_name]["outputs"]["H2_mfr"]
+            measurements["hydrogen"] = {
+                "production_rate": hercules_dict["py_sims"][self.hydrogen_name]["outputs"]\
+                    ["H2_mfr"],
+            }
             if "external_signals" in hercules_dict and \
                "hydrogen_reference" in hercules_dict["external_signals"]:
-                measurements["hydrogen_reference"] = \
+                measurements["hydrogen"]["power_reference"] = \
                     hercules_dict["external_signals"]["hydrogen_reference"]
             else:
-                measurements["hydrogen_reference"] = POWER_SETPOINT_DEFAULT
+                measurements["hydrogen"]["power_reference"] = POWER_SETPOINT_DEFAULT
         measurements["total_power"] = total_power
 
         return measurements

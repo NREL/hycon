@@ -106,31 +106,33 @@ class HerculesHybridLongRunInterface(HerculesInterfaceBase):
 
         # Wind farm parameters
         if self._has_wind_component:
-            self.plant_parameters["wind_capacity"] = h_dict["wind_farm"]["capacity"]
-            self.plant_parameters["n_turbines"] = h_dict["wind_farm"]["n_turbines"]
-            self._n_turbines = self.plant_parameters["n_turbines"]
-            self.plant_parameters["turbines"] = range(self.plant_parameters["n_turbines"])
+            self.plant_parameters["wind_farm"] = {
+                "capacity": h_dict["wind_farm"]["capacity"],
+                "n_turbines": h_dict["wind_farm"]["n_turbines"],
+                "turbines": range(h_dict["wind_farm"]["n_turbines"]),
+            }
+            self._n_turbines = self.plant_parameters["wind_farm"]["n_turbines"]
         else:
             self._n_turbines = 0
 
         # Solar farm parameters
         if self._has_solar_component:
-            self.plant_parameters["solar_capacity"] = h_dict["solar_farm"]["capacity"]
+            self.plant_parameters["solar_farm"] = {
+                "capacity": h_dict["solar_farm"]["capacity"]
+            }
 
         # Battery parameters
         if self._has_battery_component:
-            self.plant_parameters["battery_power_capacity"] = h_dict["battery"]["size"] 
-            self.plant_parameters["battery_energy_capacity"] = (
-                h_dict["battery"]["energy_capacity"] 
-            )
-            self.plant_parameters["battery_charge_rate"] = h_dict["battery"]["charge_rate"]
-            self.plant_parameters["battery_discharge_rate"] = (
-                h_dict["battery"]["discharge_rate"] 
-            )
+            self.plant_parameters["battery"] = {
+                "power_capacity": h_dict["battery"]["size"],
+                "energy_capacity": h_dict["battery"]["energy_capacity"],
+                "charge_rate": h_dict["battery"]["charge_rate"],
+                "discharge_rate": h_dict["battery"]["discharge_rate"],
+            }
 
-        # Electrolyzer parameters
+        # Electrolyzer parameters (placeholder for future electrolyzer parameters)
         if self._has_hydrogen_component:
-            pass # Placeholder for future electrolyzer parameters
+            self.plant_parameters["hydrogen"] = {}
 
     def check_controls(self, controls_dict):
         available_controls = [
@@ -152,68 +154,84 @@ class HerculesHybridLongRunInterface(HerculesInterfaceBase):
     def get_measurements(self, h_dict):
         time = h_dict["time"]
 
-        # Defaults for external signals
+        # Set up placeholder dictionary
         measurements = {
             "time": time,
-        } 
-        plant_power_reference = POWER_SETPOINT_DEFAULT
-        forecast = {}
+            "forecast": {},
+            "wind_farm": {},
+            "solar_farm": {},
+            "battery": {},
+            "hydrogen": {},
+        }
 
-        # Handle external signals
+        # Handle external signals (parse and pass to individual components)
         if "external_signals" in h_dict:
+
+            # TODO: wind_reference, hydrogen_reference, etc. should likely 
+            # by copied onto their specific subdicts
             if "plant_power_reference" in h_dict["external_signals"]:
-                plant_power_reference = h_dict["external_signals"]["plant_power_reference"]
-            else:
-                plant_power_reference = POWER_SETPOINT_DEFAULT
-            measurements["plant_power_reference"] = plant_power_reference
+                measurements["plant_power_reference"] = (
+                    h_dict["external_signals"]["plant_power_reference"]
+                )
 
             if "wind_power_reference" in h_dict["external_signals"]:
-                measurements["wind_power_reference"] = h_dict["external_signals"][
-                    "wind_power_reference"
-                ]
+                wind_power_reference = h_dict["external_signals"]["wind_power_reference"]
+            else:
+                wind_power_reference = None
 
             if "solar_power_reference" in h_dict["external_signals"]:
-                measurements["solar_power_reference"] = h_dict["external_signals"][
-                    "solar_power_reference"
-                ]
+                solar_power_reference = h_dict["external_signals"]["solar_power_reference"]
+            else:
+                solar_power_reference = None
 
             if "battery_power_reference" in h_dict["external_signals"]:
-                measurements["battery_power_reference"] = h_dict["external_signals"][
-                    "battery_power_reference"
-                ]
+                battery_power_reference = h_dict["external_signals"]["battery_power_reference"]
+            else:
+                battery_power_reference = None
 
+            # TODO: other battery components in external_signals?
+
+            if "hydrogen_reference" in h_dict["external_signals"]:
+                hydrogen_reference = h_dict["external_signals"]["hydrogen_reference"]
+            else:
+                hydrogen_reference = None
+
+            # Special handling for forecast elements
             for k in h_dict["external_signals"].keys():
-                if "forecast" in k != "wind_power_reference":
-                    forecast[k] = h_dict["external_signals"][k]
-            measurements["forecast"] = forecast
+                if "forecast" in k:
+                    measurements["forecast"][k] = h_dict["external_signals"][k]
 
         total_power = 0.0
 
-
-
         if self._has_wind_component:
-            turbine_powers = h_dict["wind_farm"]["turbine_powers"]
-            measurements["wind_turbine_powers"] =  turbine_powers
-            measurements["wind_directions"] = \
-                [h_dict["wind_farm"]["wind_direction"]]*self._n_turbines
-            total_power += sum(turbine_powers)
+            measurements["wind_farm"] = {
+                "turbine_powers": h_dict["wind_farm"]["turbine_powers"],
+                "wind_directions": [h_dict["wind_farm"]["wind_direction"]]*self._n_turbines,
+                # TODO: wind_speeds?
+                "power_reference": wind_power_reference,
+            }
+            total_power += sum(measurements["wind_farm"]["turbine_powers"])
         if self._has_solar_component:
-            measurements["solar_power"] = h_dict["solar_farm"]["power"]
-            measurements["solar_dni"] = h_dict["solar_farm"]["dni"]
-            measurements["solar_aoi"] = h_dict["solar_farm"]["aoi"]
-            total_power += measurements["solar_power"]
+            measurements["solar_farm"] = {
+                "power": h_dict["solar_farm"]["power"],
+                "direct_normal_irradiance": h_dict["solar_farm"]["dni"],
+                "angle_of_incidence": h_dict["solar_farm"]["aoi"],
+                "power_reference": solar_power_reference,
+            }
+            total_power += measurements["solar_farm"]["power"]
         if self._has_battery_component:
-            measurements["battery_power"] = h_dict["battery"]["power"]
-            measurements["battery_soc"] = h_dict["battery"]["soc"]
-            total_power += measurements["battery_power"]
+            measurements["battery"] = {
+                "power": h_dict["battery"]["power"],
+                "state_of_charge": h_dict["battery"]["soc"],
+                "power_reference": battery_power_reference,
+            }
+            total_power += measurements["battery"]["power"]
         if self._has_hydrogen_component:
-            measurements["hydrogen_production_rate"] = h_dict["electrolyzer"]["H2_mfr"]
-            if "external_signals" in h_dict and \
-               "hydrogen_reference" in h_dict["external_signals"]:
-                measurements["hydrogen_reference"] = \
-                    h_dict["external_signals"]["hydrogen_reference"]
-            else:
-                measurements["hydrogen_reference"] = POWER_SETPOINT_DEFAULT
+            measurements["hydrogen"] = {
+                "production_rate": h_dict["electrolyzer"]["H2_mfr"],
+                "power_reference": hydrogen_reference,
+            }
+
         measurements["total_power"] = total_power
 
         return measurements

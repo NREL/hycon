@@ -32,6 +32,14 @@ class HydrogenPlantController(ControllerBase):
 
         # Assign the individual asset controllers
         self.generator_controller = generator_controller
+        # TODO: better handling for multi-component controller; will need to think about how to
+        # how to handle. 
+        if "wind_farm" in input_dict:
+            self.generator_name = "wind_farm"
+        elif "solar_farm" in input_dict:
+            self.generator_name = "solar_farm"
+        else:
+            raise NotImplementedError("No supported generator found in input_dict.")
 
         # Check that parameters are not specified both in input file
         # and in controller_parameters
@@ -81,8 +89,8 @@ class HydrogenPlantController(ControllerBase):
         if self.generator_controller:
             # Create exhaustive generator measurements dict to handle variety
             # of possible lower-level controllers
-            generator_measurements_dict = copy.deepcopy(measurements_dict)
-            generator_measurements_dict["wind_power_reference"] = power_reference
+            generator_measurements_dict = copy.deepcopy(measurements_dict[self.generator_name])
+            generator_measurements_dict["power_reference"] = power_reference
             generator_controls_dict = self.generator_controller.compute_controls(
                 generator_measurements_dict
             )
@@ -93,11 +101,9 @@ class HydrogenPlantController(ControllerBase):
 
     def supervisory_control(self, measurements_dict):
         # Extract measurements sent
-        time = measurements_dict["time"] # noqa: F841 
         current_power = measurements_dict["total_power"]
-        hydrogen_output = measurements_dict["hydrogen_production_rate"]
-        wind_speed = measurements_dict["wind_speed"] # noqa: F841
-        hydrogen_reference = measurements_dict["hydrogen_reference"]
+        hydrogen_output = measurements_dict["hydrogen"]["production_rate"]
+        hydrogen_reference = measurements_dict["hydrogen"]["power_reference"]
 
         # Input filtering
         a = 0.05

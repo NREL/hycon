@@ -3,17 +3,23 @@ import numpy as np
 from whoc.controllers.controller_base import ControllerBase
 
 
-class HybridSupervisoryControllerBaseline(ControllerBase):
+class HybridSupervisoryControllerBase(ControllerBase):
+    """
+    Base class for hybrid supervisory controllers, implementing shared functionality.
+    """
     def __init__(
-            self,
-            interface,
-            input_dict,
-            wind_controller=None,
-            solar_controller=None,
-            battery_controller=None,
-            verbose=False
-        ):
-        super().__init__(interface, verbose=verbose)
+        self,
+        interface,
+        input_dict,
+        wind_controller=None,
+        solar_controller=None,
+        battery_controller=None,
+        verbose=False
+    ):
+        super().__init__(
+            interface=interface,
+            verbose=verbose
+        )
 
         self.dt = input_dict["dt"]  # Won't be needed here, but generally good to have
 
@@ -26,19 +32,7 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         self._has_wind_controller = wind_controller is not None
         self._has_battery_controller = battery_controller is not None
 
-        # Must provide a controller for one type of generation if using Baseline directly
-        # TODO: This feels like an example of 'bad' inheritance(?).
-        if (
-            type(self) is HybridSupervisoryControllerBaseline
-            and not self._has_wind_controller
-            and not self._has_solar_controller
-        ):
-            raise ValueError(
-                "The HybridSupervisoryControllerBaseline requires that either a solar_controller"
-                " or a wind_controller be provided."
-            )
-
-        # Initialize Power references
+        # Initialize power references
         self.wind_reference = 0
         self.solar_reference = 0
         self.battery_reference = 0
@@ -68,6 +62,31 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
             controls_dict["battery_power_setpoint"] = battery_controls_dict["power_setpoint"]
 
         return controls_dict
+
+class HybridSupervisoryControllerBaseline(HybridSupervisoryControllerBase):
+    def __init__(
+            self,
+            interface,
+            input_dict,
+            wind_controller=None,
+            solar_controller=None,
+            battery_controller=None,
+            verbose=False
+        ):
+        super().__init__(
+            interface=interface,
+            input_dict=input_dict,
+            wind_controller=wind_controller,
+            solar_controller=solar_controller,
+            battery_controller=battery_controller,
+            verbose=verbose
+        )
+
+        if not self._has_wind_controller and not self._has_solar_controller:
+            raise ValueError(
+                "The HybridSupervisoryControllerBaseline requires that either a solar_controller"
+                " or a wind_controller be provided."
+            )
 
     def supervisory_control(self, measurements_dict):
         # Extract measurements sent
@@ -173,7 +192,7 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         return wind_reference, solar_reference, battery_reference
 
 
-class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBaseline):
+class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
     """
     Modified version of HybridSupervisoryControllerBaseline that accepts
     individual references for wind and solar generation and respects an

@@ -40,6 +40,7 @@ class BatteryController(ControllerBase):
         self.set_controller_parameters(**controller_parameters)
         
         # Assumes one battery!
+        # TODO: This looks like it needs updating?
         battery_name = [k for k in input_dict["py_sims"] if "battery" in k][0]
         self.rated_power_charging = input_dict["py_sims"][battery_name]["charge_rate"] * 1e3
         self.rated_power_discharging = input_dict["py_sims"][battery_name]["discharge_rate"] * 1e3
@@ -113,9 +114,9 @@ class BatteryController(ControllerBase):
         """
         Main compute_controls method for BatteryController.
         """
-        reference_power = measurements_dict["power_reference"]
-        current_power = measurements_dict["battery_power"]
-        soc = measurements_dict["battery_soc"]
+        reference_power = measurements_dict["battery"]["power_reference"]
+        current_power = measurements_dict["battery"]["power"]
+        soc = measurements_dict["battery"]["state_of_charge"]
 
         # Apply reference clipping
         reference_power = self.soc_clipping(soc, reference_power)
@@ -146,7 +147,7 @@ class BatteryPassthroughController(ControllerBase):
         """"
         Main compute_controls method for BatteryPassthroughController.
         """
-        return {"power_setpoint": measurements_dict["power_reference"]}
+        return {"power_setpoint": measurements_dict["battery"]["power_reference"]}
 
 
 class BatteryPriceSOCController(ControllerBase):

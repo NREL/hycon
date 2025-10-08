@@ -55,40 +55,16 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         # Package the controls for the individual controllers, step, and return
         controls_dict = {}
         if self._has_wind_controller:
-            wind_measurements_dict = {
-                "wind_power_reference": wind_reference,
-                "wind_turbine_powers": measurements_dict["wind_turbine_powers"]
-            }
-            wind_controls_dict = self.wind_controller.compute_controls(wind_measurements_dict)
-            controls_dict["wind_power_setpoints"] = wind_controls_dict["wind_power_setpoints"]
+            measurements_dict["wind_farm"]["power_reference"] = wind_reference
+            wind_controls_dict = self.wind_controller.compute_controls(measurements_dict)
+            controls_dict["wind_power_setpoints"] = wind_controls_dict["power_setpoints"]
         if self._has_solar_controller:
-            # TODO: update to "solar_power_reference"?
-            solar_measurements_dict = {"power_reference": solar_reference}
-            solar_controls_dict = self.solar_controller.compute_controls(solar_measurements_dict)
+            measurements_dict["solar_farm"]["power_reference"] = solar_reference
+            solar_controls_dict = self.solar_controller.compute_controls(measurements_dict)
             controls_dict["solar_power_setpoint"] = solar_controls_dict["power_setpoint"]
         if self._has_battery_controller:
-            # TODO: update to "battery_power_reference"?
-            battery_measurements_dict = {
-                "time": measurements_dict["time"],
-                "power_reference": battery_reference,
-                "battery_power": measurements_dict["battery_power"],
-                "battery_soc": measurements_dict["battery_soc"]
-            }
-
-            # Additional information used by certain controllers
-            if "lmp_rt" in measurements_dict:
-                battery_measurements_dict["lmp_rt"] = measurements_dict["lmp_rt"]
-            if "lmp_da" in measurements_dict:
-                battery_measurements_dict["lmp_da"] = measurements_dict["lmp_da"]
-            if "discharge_price" in measurements_dict:
-                battery_measurements_dict["discharge_price"] = measurements_dict["discharge_price"]
-            if "charge_price" in measurements_dict:
-                battery_measurements_dict["charge_price"] = measurements_dict["charge_price"]
-
-   
-            battery_controls_dict = self.battery_controller.compute_controls(
-                battery_measurements_dict
-            )
+            measurements_dict["battery"]["power_reference"] = battery_reference 
+            battery_controls_dict = self.battery_controller.compute_controls(measurements_dict)
             controls_dict["battery_power_setpoint"] = battery_controls_dict["power_setpoint"]
 
         return controls_dict
@@ -97,24 +73,24 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         # Extract measurements sent
         time = measurements_dict["time"] # noqa: F841 
         if self._has_wind_controller:
-            wind_power = np.array(measurements_dict["wind_turbine_powers"]).sum()
-            wind_speed = measurements_dict["wind_speed"] # noqa: F841
+            wind_power = np.array(measurements_dict["wind_farm"]["turbine_powers"]).sum()
+            wind_speed = measurements_dict["wind_farm"]["wind_speed"] # noqa: F841
         else:
             wind_power = 0
             wind_speed = 0 # noqa: F841
 
         if self._has_solar_controller:
-            solar_power = measurements_dict["solar_power"]
-            solar_dni = measurements_dict["solar_dni"] # direct normal irradiance # noqa: F841
-            solar_aoi = measurements_dict["solar_aoi"] # angle of incidence # noqa: F841
+            solar_power = measurements_dict["solar_farm"]["power"]
+            solar_dni = measurements_dict["solar_farm"]["direct_normal_irradiance"] # noqa: F841
+            solar_aoi = measurements_dict["solar_farm"]["angle_of_incidence"] # noqa: F841
         else:
             solar_power = 0
             solar_dni = 0 # noqa: F841
             solar_aoi = 0 # noqa: F841
 
         if self._has_battery_controller:
-            battery_power = measurements_dict["battery_power"]
-            battery_soc = measurements_dict["battery_soc"]
+            battery_power = measurements_dict["battery"]["power"]
+            battery_soc = measurements_dict["battery"]["state_of_charge"]
         else:
             battery_power = 0
             battery_soc = 0
@@ -134,7 +110,7 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         # Calculate battery reference value
         if self._has_battery_controller:
             battery_reference = plant_power_reference - (wind_power + solar_power)
-            battery_charge_rate = self.plant_parameters["battery_charge_rate"]
+            battery_charge_rate = self.plant_parameters["battery"]["charge_rate"]
         else:
             battery_reference = 0
             battery_charge_rate = 0
@@ -261,29 +237,34 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBaseline):
 
         # Extract measurements sent
         if self._has_wind_controller:
-            wind_power = np.array(measurements_dict["wind_turbine_powers"]).sum()
-            wind_reference = measurements_dict["wind_power_reference"]
-            wind_reference = np.minimum(wind_reference, self.plant_parameters["wind_capacity"])
+            wind_power = np.array(measurements_dict["wind_farm"]["turbine_powers"]).sum()
+            wind_reference = measurements_dict["wind_farm"]["power_reference"]
+            wind_reference = np.minimum(
+                wind_reference,
+                self.plant_parameters["wind_farm"]["capacity"]
+            )
         else:
             wind_power = 0
             wind_reference = 0
 
         if self._has_solar_controller:
-            solar_power = measurements_dict["solar_power"]
-            solar_reference = measurements_dict["solar_power_reference"]
-            solar_reference = np.minimum(solar_reference, self.plant_parameters["solar_capacity"])
+            solar_power = measurements_dict["solar_farm"]["power"]
+            solar_reference = measurements_dict["solar_farm"]["power_reference"]
+            solar_reference = np.minimum(
+                solar_reference, self.plant_parameters["solar_farm"]["capacity"]
+            )
         else:
             solar_power = 0
             solar_reference = 0
 
         if self._has_battery_controller:
-            battery_power = measurements_dict["battery_power"]
-            battery_reference = measurements_dict["battery_power_reference"]
+            battery_power = measurements_dict["battery"]["power"]
+            battery_reference = measurements_dict["battery"]["power_reference"]
             battery_reference = np.minimum(
-                battery_reference, self.plant_parameters["battery_discharge_rate"]
+                battery_reference, self.plant_parameters["battery"]["discharge_rate"]
             )
             battery_reference = np.maximum(
-                battery_reference, -1 * self.plant_parameters["battery_charge_rate"]
+                battery_reference, -1 * self.plant_parameters["battery"]["charge_rate"]
             )
         else:
             battery_power = 0

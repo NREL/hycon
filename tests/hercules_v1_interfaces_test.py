@@ -54,11 +54,11 @@ def test_HerculesADInterface():
 
     assert measurements["time"] == test_hercules_dict["time"]
     assert (
-        measurements["wind_directions"]
+        measurements["wind_farm"]["wind_directions"]
         == test_hercules_dict["hercules_comms"]["amr_wind"]["test_farm"]["turbine_wind_directions"]
     )
     assert (
-        measurements["wind_turbine_powers"]
+        measurements["wind_farm"]["turbine_powers"]
         == test_hercules_dict["hercules_comms"]["amr_wind"]["test_farm"]["turbine_powers"]
     )
     test_forecast = {
@@ -70,7 +70,7 @@ def test_HerculesADInterface():
     controls_dict = {"yaw_angles": [270.0, 278.9]}
     controls_dict2 = {
         "yaw_angles": [270.0, 268.9],
-        "wind_power_setpoints": [3000.0, 3000.0],
+        "power_setpoints": [3000.0, 3000.0],
     }
     interface.check_controls(controls_dict)
     interface.check_controls(controls_dict2)
@@ -78,7 +78,7 @@ def test_HerculesADInterface():
     bad_controls_dict1 = {"yaw_angels": [270.0, 268.9]}  # Misspelling
     bad_controls_dict2 = {
         "yaw_angles": [270.0, 268.9],
-        "wind_power_setpoints": [3000.0, 3000.0],
+        "power_setpoints": [3000.0, 3000.0],
         "unavailable_control": [0.0, 0.0],
     }
     bad_controls_dict3 = {"yaw_angles": [270.0, 268.9, 270.0]}  # Mismatched number of turbines
@@ -109,9 +109,9 @@ def test_HerculesADInterface():
     # wind_power_reference takes precedence
     test_hercules_dict["external_signals"]["wind_power_reference"] = 500.0
     test_hercules_dict["external_signals"]["plant_power_reference"] = 400.0
-    assert interface.get_measurements(test_hercules_dict)["wind_power_reference"] == 500.0
+    assert interface.get_measurements(test_hercules_dict)["wind_farm"]["power_reference"] == 500.0
     del test_hercules_dict["external_signals"]["wind_power_reference"]
-    assert interface.get_measurements(test_hercules_dict)["wind_power_reference"] == 400.0
+    assert interface.get_measurements(test_hercules_dict)["wind_farm"]["power_reference"] == 400.0
     # Reinstate original values for future tests
     test_hercules_dict["external_signals"]["wind_power_reference"] = 1000.0
     test_hercules_dict["external_signals"]["plant_power_reference"] = 1000.0
@@ -124,30 +124,32 @@ def test_HerculesHybridADInterface():
 
     assert measurements["time"] == test_hercules_dict["time"]
     assert (
-        measurements["wind_turbine_powers"]
+        measurements["wind_farm"]["turbine_powers"]
         == test_hercules_dict["hercules_comms"]["amr_wind"]["test_farm"]["turbine_powers"]
     )
     assert (
-        measurements["wind_speed"]
+        measurements["wind_farm"]["wind_speed"]
         == test_hercules_dict["hercules_comms"]["amr_wind"]["test_farm"]["wind_speed"]
     )
     assert (
-        measurements["power_reference"]
+        measurements["wind_farm"]["power_reference"]
         == test_hercules_dict["external_signals"]["wind_power_reference"]
     )
     assert (
-        measurements["battery_power"]
+        measurements["battery"]["power"]
         == -test_hercules_dict["py_sims"]["test_battery"]["outputs"]["power"]
     )
     assert (
-        measurements["solar_power"]
+        measurements["solar_farm"]["power"]
         == test_hercules_dict["py_sims"]["test_solar"]["outputs"]["power_mw"] * 1000
     )
     assert (
-        measurements["solar_dni"] == test_hercules_dict["py_sims"]["test_solar"]["outputs"]["dni"]
+        measurements["solar_farm"]["direct_normal_irradiance"]
+        == test_hercules_dict["py_sims"]["test_solar"]["outputs"]["dni"]
     )
     assert (
-        measurements["solar_aoi"] == test_hercules_dict["py_sims"]["test_solar"]["outputs"]["aoi"]
+        measurements["solar_farm"]["angle_of_incidence"]
+        == test_hercules_dict["py_sims"]["test_solar"]["outputs"]["aoi"]
     )
     test_forecast = {
         k: v for k, v in test_hercules_dict["external_signals"].items() if "forecast" in k
@@ -190,11 +192,11 @@ def test_HerculesHybridADInterface():
         == controls_dict["solar_power_setpoint"] / 1000
     )
     assert (
-        measurements["hydrogen_reference"]
+        measurements["hydrogen"]["power_reference"]
         == test_hercules_dict["external_signals"]["hydrogen_reference"]
     )
     assert (
-        measurements["hydrogen_production_rate"]
+        measurements["hydrogen"]["production_rate"]
         == test_hercules_dict["py_sims"]["test_hydrogen"]["outputs"]["H2_mfr"]
     )
 
@@ -219,15 +221,15 @@ def test_HerculesBatteryInterface():
     # Test get_measurements()
     measurements = interface.get_measurements(hercules_dict=test_hercules_dict)
     assert (
-        measurements["battery_power"]
+        measurements["battery"]["power"]
         == -test_hercules_dict["py_sims"]["test_battery"]["outputs"]["power"]
     )
     assert (
-        measurements["battery_soc"]
+        measurements["battery"]["state_of_charge"]
         == test_hercules_dict["py_sims"]["test_battery"]["outputs"]["soc"]
     )
     assert (
-        measurements["power_reference"]
+        measurements["battery"]["power_reference"]
         == test_hercules_dict["external_signals"]["plant_power_reference"]
     )
 

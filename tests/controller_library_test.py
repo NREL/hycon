@@ -530,7 +530,7 @@ def test_BatteryPassthroughController():
     test_controller = BatteryPassthroughController(test_interface, test_hercules_dict)
 
     power_ref = 1000
-    measurements_dict = {"power_reference": power_ref}
+    measurements_dict = {"battery":{"power_reference": power_ref}}
     controls_dict = test_controller.compute_controls(measurements_dict)
     assert controls_dict["power_setpoint"] == power_ref
 
@@ -539,7 +539,7 @@ def test_SolarPassthroughController():
     test_controller = SolarPassthroughController(test_interface, test_hercules_dict)
 
     power_ref = 1000
-    measurements_dict = {"power_reference": power_ref}
+    measurements_dict = {"solar_farm":{"power_reference": power_ref}}
     controls_dict = test_controller.compute_controls(measurements_dict)
     assert controls_dict["power_setpoint"] == power_ref
 

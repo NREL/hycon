@@ -26,9 +26,11 @@ class HerculesBatteryInterface(InterfaceBase):
 
         measurements = {
             "time": hercules_dict["time"],
-            "power_reference": plant_power_reference,
-            "battery_power": -hercules_dict["py_sims"][self.battery_name]["outputs"]["power"],
-            "battery_soc": hercules_dict["py_sims"][self.battery_name]["outputs"]["soc"]
+            "battery": {
+                "power_reference": plant_power_reference,
+                "power": -hercules_dict["py_sims"][self.battery_name]["outputs"]["power"],
+                "state_of_charge": hercules_dict["py_sims"][self.battery_name]["outputs"]["soc"],
+            },
         }
 
         return measurements

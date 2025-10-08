@@ -56,21 +56,15 @@ class HybridSupervisoryControllerBaseline(ControllerBase):
         controls_dict = {}
         if self._has_wind_controller:
             measurements_dict["wind_farm"]["power_reference"] = wind_reference
-            wind_controls_dict = self.wind_controller.compute_controls(
-                measurements_dict["wind_farm"]
-            )
+            wind_controls_dict = self.wind_controller.compute_controls(measurements_dict)
             controls_dict["wind_power_setpoints"] = wind_controls_dict["power_setpoints"]
         if self._has_solar_controller:
             measurements_dict["solar_farm"]["power_reference"] = solar_reference
-            solar_controls_dict = self.solar_controller.compute_controls(
-                measurements_dict["solar_farm"]
-            )
+            solar_controls_dict = self.solar_controller.compute_controls(measurements_dict)
             controls_dict["solar_power_setpoint"] = solar_controls_dict["power_setpoint"]
         if self._has_battery_controller:
             measurements_dict["battery"]["power_reference"] = battery_reference 
-            battery_controls_dict = self.battery_controller.compute_controls(
-                measurements_dict["battery"]
-            )
+            battery_controls_dict = self.battery_controller.compute_controls(measurements_dict)
             controls_dict["battery_power_setpoint"] = battery_controls_dict["power_setpoint"]
 
         return controls_dict

@@ -46,12 +46,14 @@ class HerculesADInterface(InterfaceBase):
 
         measurements = {
             "time": time,
-            "wind_directions": wind_directions,
-            # "wind_speeds":wind_speeds,
-            "turbine_powers": turbine_powers,
-            "power_reference": wind_power_reference,
-            "forecast": forecast,
             "total_power": sum(turbine_powers),
+            "forecast": forecast,
+            "wind_farm": {
+                "wind_directions": wind_directions,
+                # "wind_speeds":wind_speeds,
+                "turbine_powers": turbine_powers,
+                "power_reference": wind_power_reference,
+            },
         }
 
         return measurements
@@ -128,6 +130,11 @@ class HerculesHybridADInterface(InterfaceBase):
         plant_power_reference = POWER_SETPOINT_DEFAULT
         forecast = {}
 
+        wind_power_reference = None
+        solar_power_reference = None
+        battery_power_reference = None
+        hydrogen_power_reference = None
+
         # Handle external signals
         if "external_signals" in hercules_dict:
             if "plant_power_reference" in hercules_dict["external_signals"]:
@@ -136,6 +143,17 @@ class HerculesHybridADInterface(InterfaceBase):
             for k in hercules_dict["external_signals"].keys():
                 if "forecast" in k != "wind_power_reference":
                     forecast[k] = hercules_dict["external_signals"][k]
+
+            if "wind_power_reference" in hercules_dict["external_signals"]:
+                wind_power_reference = hercules_dict["external_signals"]["wind_power_reference"]
+            if "solar_power_reference" in hercules_dict["external_signals"]:
+                solar_power_reference = hercules_dict["external_signals"]["solar_power_reference"]
+            if "battery_power_reference" in hercules_dict["external_signals"]:
+                battery_power_reference = (
+                    hercules_dict["external_signals"]["battery_power_reference"]
+                )
+            if "hydrogen_reference" in hercules_dict["external_signals"]:
+                hydrogen_power_reference = hercules_dict["external_signals"]["hydrogen_reference"]
 
         total_power = 0.0
 
@@ -152,7 +170,8 @@ class HerculesHybridADInterface(InterfaceBase):
             measurements["wind_farm"] = {
                 "turbine_powers": turbine_powers,
                 "wind_speed": hercules_dict["hercules_comms"]["amr_wind"][self.wind_name]\
-                    ["wind_speed"]
+                    ["wind_speed"],
+                "power_reference": wind_power_reference,
             }
             total_power += sum(turbine_powers)
         if self._has_solar_component:
@@ -164,12 +183,14 @@ class HerculesHybridADInterface(InterfaceBase):
                 "direct_normal_irradiance": hercules_dict["py_sims"][self.solar_name]["outputs"]\
                     ["dni"],
                 "angle_of_incidence": hercules_dict["py_sims"][self.solar_name]["outputs"]["aoi"],
+                "power_reference": solar_power_reference,
             }
             total_power += measurements["solar_farm"]["power"]
         if self._has_battery_component:
             measurements["battery"] = {
                 "power": -hercules_dict["py_sims"][self.battery_name]["outputs"]["power"],
                 "state_of_charge": hercules_dict["py_sims"][self.battery_name]["outputs"]["soc"],
+                "power_reference": battery_power_reference,
             }
             total_power += measurements["battery"]["power"]
         if self._has_hydrogen_component:
@@ -177,13 +198,8 @@ class HerculesHybridADInterface(InterfaceBase):
             measurements["hydrogen"] = {
                 "production_rate": hercules_dict["py_sims"][self.hydrogen_name]["outputs"]\
                     ["H2_mfr"],
+                "power_reference": hydrogen_power_reference,
             }
-            if "external_signals" in hercules_dict and \
-               "hydrogen_reference" in hercules_dict["external_signals"]:
-                measurements["hydrogen"]["power_reference"] = \
-                    hercules_dict["external_signals"]["hydrogen_reference"]
-            else:
-                measurements["hydrogen"]["power_reference"] = POWER_SETPOINT_DEFAULT
         measurements["total_power"] = total_power
 
         return measurements

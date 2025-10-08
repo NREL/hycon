@@ -22,14 +22,14 @@ class WindFarmPowerDistributingController(ControllerBase):
         self.turbines = range(self.n_turbines)
 
     def compute_controls(self, measurements_dict):
-        if "wind_power_reference" in measurements_dict:
-            farm_power_reference = measurements_dict["wind_power_reference"]
+        if "power_reference" in measurements_dict["wind_farm"]:
+            farm_power_reference = measurements_dict["wind_farm"]["power_reference"]
         else:
             farm_power_reference = POWER_SETPOINT_DEFAULT
         
         return self.turbine_power_references(
             farm_power_reference=farm_power_reference,
-            turbine_powers=measurements_dict["turbine_powers"]
+            turbine_powers=measurements_dict["wind_farm"]["turbine_powers"]
         )
 
     def turbine_power_references(

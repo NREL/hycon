@@ -32,14 +32,6 @@ class HydrogenPlantController(ControllerBase):
 
         # Assign the individual asset controllers
         self.generator_controller = generator_controller
-        # TODO: better handling for multi-component controller; will need to think about how to
-        # how to handle. 
-        if "wind_farm" in input_dict:
-            self.generator_name = "wind_farm"
-        elif "solar_farm" in input_dict:
-            self.generator_name = "solar_farm"
-        else:
-            raise NotImplementedError("No supported generator found in input_dict.")
 
         # Check that parameters are not specified both in input file
         # and in controller_parameters
@@ -89,13 +81,18 @@ class HydrogenPlantController(ControllerBase):
         if self.generator_controller:
             # Create exhaustive generator measurements dict to handle variety
             # of possible lower-level controllers
-            generator_measurements_dict = copy.deepcopy(measurements_dict[self.generator_name])
+            generator_measurements_dict = copy.deepcopy(measurements_dict)
             generator_measurements_dict["power_reference"] = power_reference
             generator_controls_dict = self.generator_controller.compute_controls(
                 generator_measurements_dict
             )
             if "yaw_angles" in generator_controls_dict:
                 del generator_controls_dict["yaw_angles"]
+            if "power_setpoints" in generator_controls_dict:
+                generator_controls_dict["wind_power_setpoints"] = (
+                    generator_controls_dict["power_setpoints"]
+                )
+                del generator_controls_dict["power_setpoints"]
 
         return generator_controls_dict
 

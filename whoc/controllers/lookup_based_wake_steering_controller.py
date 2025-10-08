@@ -78,7 +78,7 @@ class LookupBasedWakeSteeringController(ControllerBase):
 
 
     def compute_controls(self, measurements_dict):
-        return self.wake_steering_angles(measurements_dict["wind_directions"])
+        return self.wake_steering_angles(measurements_dict["wind_farm"]["wind_directions"])
 
     def wake_steering_angles(self, wind_directions):
 

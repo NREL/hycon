@@ -163,8 +163,8 @@ class BatteryPriceSOCController(ControllerBase):
         self.low_soc_price = 0 # $/MWh
         self.low_soc = 0.2 # Below this SOC, only discharge if price is higher than high_soc_price
 
-        self.rated_power_charging = input_dict["battery"]["charge_rate"] * 1e3
-        self.rated_power_discharging = input_dict["battery"]["discharge_rate"] * 1e3
+        self.rated_power_charging = input_dict["battery"]["charge_rate"]
+        self.rated_power_discharging = input_dict["battery"]["discharge_rate"]
 
     def compute_controls(self, measurements_dict):
 
@@ -176,7 +176,6 @@ class BatteryPriceSOCController(ControllerBase):
         # In this controller, the battery reference acts as an upper bound
         curtailment_limit = measurements_dict["battery"]["power_reference"]
 
-        
         power_reference = 0
 
         # Note that the convention is followed where charging is negative power
@@ -194,4 +193,4 @@ class BatteryPriceSOCController(ControllerBase):
         power_reference = min(curtailment_limit,power_reference)
 
 
-        return {"power_setpoint": power_reference}
+        return {"battery_power_setpoint": power_reference} # TODO: is this ok? How best to handle?

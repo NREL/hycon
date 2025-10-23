@@ -193,4 +193,4 @@ class BatteryPriceSOCController(ControllerBase):
         power_reference = min(curtailment_limit,power_reference)
 
 
-        return {"battery_power_setpoint": power_reference} # TODO: is this ok? How best to handle?
+        return {"power_setpoint": power_reference}

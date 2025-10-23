@@ -12,8 +12,8 @@ test_hercules_dict = {
         "energy_capacity": 400.0,
         "power": 100.0,
         "soc": 0.5,
-        "charge_rate": 50.0,
-        "discharge_rate": 100.0,
+        "charge_rate": 50.0 * 1e3,
+        "discharge_rate": 100.0 * 1e3,
     },
     "external_signals": {  # Is this OK like this?
         "charge_price": 0.0,
@@ -32,11 +32,11 @@ def test_BatteryPriceSOCController_init():
 
     # Check that the controller is initialized correctly
     assert (
-        test_controller.rated_power_charging == test_hercules_dict["battery"]["charge_rate"] * 1e3
+        test_controller.rated_power_charging == test_hercules_dict["battery"]["charge_rate"]
     )
     assert (
         test_controller.rated_power_discharging
-        == test_hercules_dict["battery"]["discharge_rate"] * 1e3
+        == test_hercules_dict["battery"]["discharge_rate"]
     )
 
 

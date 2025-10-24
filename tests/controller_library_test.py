@@ -21,7 +21,7 @@ from whoc.interfaces import (
     HerculesADInterface,
     HerculesBatteryInterface,
     HerculesHybridADInterface,
-    HerculesHybridLongRunInterface,
+    HerculesV2Interface,
 )
 from whoc.interfaces.interface_base import InterfaceBase
 
@@ -473,7 +473,7 @@ def test_HybridSupervisoryControllerMultiRef_requirements():
     # Check that errors are correctly raised if interconnect_limit is not set correctly
     test_hercules_v2_dict_temp = copy.deepcopy(test_hercules_v2_dict)
     del test_hercules_v2_dict_temp["plant"]["interconnect_limit"]
-    interface = HerculesHybridLongRunInterface(test_hercules_v2_dict_temp)
+    interface = HerculesV2Interface(test_hercules_v2_dict_temp)
     with pytest.raises(KeyError):
         HybridSupervisoryControllerMultiRef(interface, test_hercules_v2_dict_temp)
 
@@ -486,7 +486,7 @@ def test_HybridSupervisoryControllerMultiRef_requirements():
         HybridSupervisoryControllerMultiRef(interface, test_hercules_v2_dict_temp)
 
 def test_HybridSupervisoryControllerMultiRef():
-    test_interface = HerculesHybridLongRunInterface(test_hercules_v2_dict)
+    test_interface = HerculesV2Interface(test_hercules_v2_dict)
 
     # Establish lower controllers
     wind_controller = WindFarmPowerTrackingController(test_interface, test_hercules_v2_dict)

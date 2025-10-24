@@ -1,8 +1,5 @@
 import pytest
-from whoc.interfaces import (
-    HerculesHybridLongRunInterface,
-    HerculesWindLongRunInterface,
-)
+from whoc.interfaces import HerculesV2Interface
 
 test_hercules_dict = {
     "dt": 1,
@@ -53,17 +50,16 @@ def test_interface_instantiation():
     each implement the required methods specified by InterfaceBase.
     """
 
-    _ = HerculesWindLongRunInterface(h_dict=test_hercules_dict)
-    _ = HerculesHybridLongRunInterface(h_dict=test_hercules_dict)
+    _ = HerculesV2Interface(h_dict=test_hercules_dict)
 
-def test_HerculesWindLongRunInterface():
+def test_HerculesV2Interface_windonly():
     # Test instantiation
-    interface = HerculesWindLongRunInterface(h_dict=test_hercules_dict)
+    interface = HerculesV2Interface(h_dict=test_hercules_dict)
     assert interface.dt == test_hercules_dict["dt"]
-    assert interface.plant_parameters["nameplate_capacity"] == (
+    assert interface.plant_parameters["wind_farm"]["capacity"] == (
         test_hercules_dict["wind_farm"]["capacity"]
     )
-    assert interface.plant_parameters["n_turbines"] == (
+    assert interface.plant_parameters["wind_farm"]["n_turbines"] == (
         test_hercules_dict["wind_farm"]["n_turbines"]
     )
 
@@ -71,10 +67,12 @@ def test_HerculesWindLongRunInterface():
     measurements = interface.get_measurements(h_dict=test_hercules_dict)
     assert measurements["time"] == test_hercules_dict["time"]
     assert (
-        measurements["wind_directions"] == [test_hercules_dict["wind_farm"]["wind_direction"]] * 2
+        measurements["wind_farm"]["wind_directions"]
+        == [test_hercules_dict["wind_farm"]["wind_direction"]] * 2
     )
     assert (
-        measurements["wind_turbine_powers"] == test_hercules_dict["wind_farm"]["turbine_powers"]
+        measurements["wind_farm"]["turbine_powers"]
+        == test_hercules_dict["wind_farm"]["turbine_powers"]
     )
     test_forecast = {
         k: v for k, v in test_hercules_dict["external_signals"].items() if "forecast" in k
@@ -106,9 +104,9 @@ def test_HerculesWindLongRunInterface():
     with pytest.raises(TypeError):  # Bad kwarg
         interface.send_controls(test_hercules_dict, **bad_controls_dict1)
 
-def test_HerculesHybridLongRunInterface():
+def test_HerculesV2Interface_hybrid():
     # Test instantiation
-    interface = HerculesHybridLongRunInterface(h_dict=test_hercules_dict)
+    interface = HerculesV2Interface(h_dict=test_hercules_dict)
     assert interface.dt == test_hercules_dict["dt"]
     assert interface.plant_parameters["wind_farm"]["capacity"] == (
         test_hercules_dict["wind_farm"]["capacity"]

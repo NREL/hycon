@@ -51,6 +51,17 @@ class ControllerBase(metaclass=ABCMeta):
             "Warning: Setting dt directly is deprecated. Use the interface's dt property instead."
         )
 
+    @property
+    def cname(self):
+        if hasattr(self, "_cname"):
+            return self._cname
+        else:
+            return ValueError("cname has not been set for this controller.")
+
+    @cname.setter
+    def cname(self, value):
+        self._cname = value
+
     @abstractmethod
     def compute_controls(self, measurements_dict: dict) -> dict:
         pass  # Control algorithms should be implemented in the compute_controls 

@@ -14,22 +14,38 @@ class WindFarmPowerDistributingController(ControllerBase):
         super().__init__(interface, verbose=verbose)
 
         # Pull plant parameters for ease of use
-        # TODO: Can I more cleverly access the lower-lever plant_parameters["wind_farm"]?
-        if "wind_farm" in self.plant_parameters:
-            self.n_turbines = self.plant_parameters["wind_farm"]["n_turbines"]
+        self.cname = "wind_farm"
+        
+        if self.cname in self.plant_parameters:
+            self.n_turbines = self.plant_parameters[self.cname]["n_turbines"]
         else:
             self.n_turbines = self.plant_parameters["n_turbines"]
         self.turbines = range(self.n_turbines)
 
     def compute_controls(self, measurements_dict):
-        if "power_reference" in measurements_dict["wind_farm"]:
-            farm_power_reference = measurements_dict["wind_farm"]["power_reference"]
+        ref_in_lower_dict = (
+            "power_reference" in measurements_dict[self.cname]
+            and measurements_dict[self.cname]["power_reference"] is not None
+        )
+        ref_in_upper_dict = (
+            "power_reference" in measurements_dict
+            and measurements_dict["power_reference"] is not None
+        )
+        if ref_in_lower_dict and ref_in_upper_dict:
+            raise ValueError(
+                "Found 'power_reference' in both measurements_dict['"
+                +self.cname+"'] and measurements_dict."
+            )
+        elif ref_in_lower_dict:
+            farm_power_reference = measurements_dict[self.cname]["power_reference"]
+        elif ref_in_upper_dict:
+            farm_power_reference = measurements_dict["power_reference"]
         else:
             farm_power_reference = POWER_SETPOINT_DEFAULT
-        
+
         return self.turbine_power_references(
             farm_power_reference=farm_power_reference,
-            turbine_powers=measurements_dict["wind_farm"]["turbine_powers"]
+            turbine_powers=measurements_dict[self.cname]["turbine_powers"]
         )
 
     def turbine_power_references(

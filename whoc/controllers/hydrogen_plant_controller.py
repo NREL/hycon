@@ -83,9 +83,16 @@ class HydrogenPlantController(ControllerBase):
             # of possible lower-level controllers
             generator_measurements_dict = copy.deepcopy(measurements_dict)
             generator_measurements_dict["power_reference"] = power_reference
+            # Remove any external power reference
+            if "plant_power_reference" in generator_measurements_dict:
+                del generator_measurements_dict["plant_power_reference"]
+
+            # Compute controls for generator
             generator_controls_dict = self.generator_controller.compute_controls(
                 generator_measurements_dict
             )
+
+            # Clean up returned controls
             if "yaw_angles" in generator_controls_dict:
                 del generator_controls_dict["yaw_angles"]
             if "power_setpoints" in generator_controls_dict:

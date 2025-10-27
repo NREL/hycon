@@ -154,43 +154,73 @@ class BatteryPriceSOCController(ControllerBase):
     """
     Controller considers price and SOC to determine power setpoint.
     """
-    def __init__(self, interface, input_dict, verbose=True):
+    def __init__(self, interface, input_dict, controller_parameters={}, verbose=True):
         super().__init__(interface, verbose)
 
-        # For now hard code certain set points
-        self.high_soc_price = 25 # $/MWh
-        self.high_soc = 0.8 # Above this SOC, only charge if price is lower than low_soc_price
-        self.low_soc_price = 0 # $/MWh
-        self.low_soc = 0.2 # Below this SOC, only discharge if price is higher than high_soc_price
+        # Check that parameters are not specified both in input file
+        # and in controller_parameters
+        if "controller" in input_dict:
+            for cp in controller_parameters.keys():
+                if cp in input_dict["controller"]:
+                    raise KeyError(
+                        "Found key \""+cp+"\" in both input_dict[\"controller\"] and"
+                        " in controller_parameters."
+                    )
+            controller_parameters = {**controller_parameters, **input_dict["controller"]}
+        self.set_controller_parameters(**controller_parameters)
 
         self.rated_power_charging = input_dict["battery"]["charge_rate"]
         self.rated_power_discharging = input_dict["battery"]["discharge_rate"]
 
+    def set_controller_parameters(
+        self,
+        high_soc=0.8,
+        low_soc=0.2,
+        **_ # <- Allows arbitrary additional parameters to be passed, which are ignored
+    ):
+        """
+        Set parameters for BatteryPriceSOCController.
+
+        high_soc is the SOC threshold above which the battery will only charge if the price is above
+        the highest (hourly) DA price of the day.
+
+        low_soc is the SOC threshold below which the battery will only discharge if the price is
+        below the lowest (hourly) DA price of the day.
+
+        Args:
+            high_soc (float): High SOC threshold (0 to 1).
+            low_soc (float): Low SOC threshold (0 to 1).
+        """
+        self.high_soc = high_soc
+        self.low_soc = low_soc
+
     def compute_controls(self, measurements_dict):
 
+        day_ahead_lmps = np.array(measurements_dict["DA_LMP"])
+        sorted_lmps = np.sort(day_ahead_lmps)
+        real_time_lmp = measurements_dict["RT_LMP"]
+
+        # Extract limits
+        bottom_4 = sorted_lmps[3]
+        top_4 = sorted_lmps[-4]
+        bottom_1 = sorted_lmps[0]
+        top_1 = sorted_lmps[-1]
+
+        # Access the state of charge and LMP in real-time
         soc = measurements_dict["battery"]["state_of_charge"]
-        charge_price = measurements_dict["battery"]["charge_price"]
-        discharge_price = measurements_dict["battery"]["discharge_price"]
-        lmp_rt = measurements_dict["battery"]["lmp_rt"]
-
-        # In this controller, the battery reference acts as an upper bound
-        curtailment_limit = measurements_dict["battery"]["power_reference"]
-
-        power_reference = 0
 
         # Note that the convention is followed where charging is negative power
         # This matches what is in place in the hercules/hybrid_plant level and 
         # will be inverted before passing into the battery modules
-        if (soc <= self.high_soc) and (lmp_rt <= charge_price):
-            power_reference = -1 * self.rated_power_charging
-        elif (soc > self.high_soc) and (lmp_rt <= self.low_soc_price):
-            power_reference = -1 * self.rated_power_charging
-        elif (soc >= self.low_soc) and (lmp_rt >= discharge_price):
-            power_reference = self.rated_power_discharging
-        elif (soc < self.low_soc) and (lmp_rt >= self.high_soc_price):
-            power_reference = self.rated_power_discharging
+        if real_time_lmp > top_1:
+            power_setpoint = self.rated_power_discharging
+        elif (real_time_lmp > top_4) & (soc < self.high_soc):
+            power_setpoint = self.rated_power_discharging
+        elif real_time_lmp < bottom_1:
+            power_setpoint = -self.rated_power_charging
+        elif (real_time_lmp < bottom_4) & (soc > self.low_soc):
+            power_setpoint = -self.rated_power_charging
+        else:
+            power_setpoint = 0.0
 
-        power_reference = min(curtailment_limit,power_reference)
-
-
-        return {"power_setpoint": power_reference}
+        return {"power_setpoint": power_setpoint}

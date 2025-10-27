@@ -293,7 +293,10 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
 
         if self._has_battery_controller:
             battery_power = measurements_dict["battery"]["power"]
-            battery_reference = measurements_dict["battery"]["power_reference"]
+            if "power_reference" in measurements_dict["battery"]:
+                battery_reference = measurements_dict["battery"]["power_reference"]
+            else:
+                battery_reference = 0
             battery_reference = np.minimum(
                 battery_reference, self.plant_parameters["battery"]["discharge_rate"]
             )

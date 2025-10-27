@@ -121,8 +121,6 @@ class HerculesV2Interface(InterfaceBase):
         # Handle external signals (parse and pass to individual components)
         if "external_signals" in h_dict:
 
-            # TODO: wind_reference, hydrogen_reference, etc. should likely 
-            # by copied onto their specific subdicts
             if "plant_power_reference" in h_dict["external_signals"]:
                 measurements["plant_power_reference"] = (
                     h_dict["external_signals"]["plant_power_reference"]
@@ -144,27 +142,18 @@ class HerculesV2Interface(InterfaceBase):
                         h_dict["external_signals"]["battery_power_reference"]
                     )
 
-                if "discharge_price" in h_dict["external_signals"]:
-                    measurements["battery"]["discharge_price"] = (
-                        h_dict["external_signals"]["discharge_price"]
-                    )
-                if "charge_price" in h_dict["external_signals"]:
-                    measurements["battery"]["charge_price"] = (
-                        h_dict["external_signals"]["charge_price"]
-                    )
-                if "lmp_rt" in h_dict["external_signals"]:
-                    measurements["battery"]["lmp_rt"] = (
-                        h_dict["external_signals"]["lmp_rt"]
-                    )
-                if "lmp_da" in h_dict["external_signals"]:
-                    measurements["battery"]["lmp_da"] = (
-                        h_dict["external_signals"]["lmp_da"]
-                    )
-
             if "hydrogen_reference" in h_dict["external_signals"] and self._has_hydrogen_component:
                 measurements["hydrogen"]["power_reference"] = (
                     h_dict["external_signals"]["hydrogen_reference"]
                 )
+
+            # Grid price information
+            if "DA_LMP_00" in h_dict["external_signals"]:
+                measurements["DA_LMP"] = [
+                    h_dict["external_signals"]["DA_LMP_{:02d}".format(h)] for h in range(24)
+                ]
+            if "RT_LMP" in h_dict["external_signals"]:
+                measurements["RT_LMP"] = h_dict["external_signals"]["RT_LMP"]
 
             # Special handling for forecast elements
             for k in h_dict["external_signals"].keys():

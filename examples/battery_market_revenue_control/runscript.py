@@ -4,6 +4,7 @@ import shutil
 import sys
 
 import pandas as pd
+import numpy as np
 from hercules.emulator import Emulator
 from hercules.hybrid_plant import HybridPlant
 from hercules.utilities import load_hercules_input, setup_logging
@@ -15,63 +16,41 @@ if os.path.exists("outputs"):
     shutil.rmtree("outputs")
 os.makedirs("outputs")
 
-# TODO: Should this be internal to the controller? I.e. the controller receives just the DA price?
-def generate_pricing_power_reference(df_dayahead_lmp):
-    # Resample df_period_start_only to be hourly noting that for the day ahead
-    # data this was anyway upsampled from houly originally so only need to grab
-    # the rows which correspond to the start of each hour
-    df_period_start_only = df_dayahead_lmp[
-        df_dayahead_lmp["time"] % 3600 == 0
-    ]
+def generate_day_ahead_prices(df_dayahead_lmp):
+    df = df_dayahead_lmp[df_dayahead_lmp["time"] % 3600 == 0]
 
-    # Add a date column to df_period_start_only
-    df_period_start_only["date"] = pd.to_datetime(df_period_start_only["time_utc"]).dt.date
+    df["datetime"] = pd.to_datetime(df["time_utc"])
 
-    # The discharge price is the 4th highest price in the day
-    df_period_start_only["discharge_price"] = df_period_start_only.groupby("date")[
-        "lmp_da"
-    ].transform(lambda x: x.nlargest(4).iloc[3])
-    # The charge price is the 4th lowest price in the day
-    df_period_start_only["charge_price"] = df_period_start_only.groupby("date")[
-        "lmp_da"
-    ].transform(lambda x: x.nsmallest(4).iloc[3])
+    # Extract date and hour
+    df["date"] = df["datetime"].dt.date
+    df["hour"] = df["datetime"].dt.hour
 
-    # Merge df_period_start_only onto df and forward fill the discharge and charge prices
-    df = df_dayahead_lmp.merge(
-        df_period_start_only[["time", "discharge_price", "charge_price"]],
-        on="time",
-        how="left",
+    df_hourly = df.pivot_table(
+        values="lmp_da",
+        index="date",
+        columns="hour",
+        aggfunc="first"  # Use first value if multiple entries per hour
     )
-    df["discharge_price"] = df["discharge_price"].ffill()
-    df["charge_price"] = df["charge_price"].ffill()
+    df_hourly = df_hourly.reindex(columns=list(range(24)))
+    df_hourly = df_hourly.rename(columns={h: "DA_LMP_{:02d}".format(h) for h in df_hourly.columns})
+    df_hourly = df_hourly.reset_index()
 
+    # Add back time column and drop unneeded date column
+    df_hourly["time"] = df["time"][0:-1:24].values
+    df_hourly = df_hourly.drop(columns=["date"])
 
-    # In this setting battery power reference sets the max power
-    df["battery_power_reference"] = 10000
+    df = (df_dayahead_lmp[["time", "lmp_rt", "lmp_da"]]
+          .rename(columns={"lmp_rt": "RT_LMP", "lmp_da": "DA_LMP"})
+          .merge(
+            df_hourly,
+            on="time",
+            how="left",
+          )
+          .fillna(method="ffill")
+    )
 
-    df = df[
-        ["time", "battery_power_reference", "discharge_price", "charge_price", "lmp_rt", "lmp_da"]
-    ]
-
-    df.to_csv("power_reference.csv", index=False)
+    df.to_csv("lmp_data.csv", index=False)
     return None
-
-
-# ## TEMPORARY
-
-# df = pd.read_feather("lmp_input.ftr")
-# df = df[df.time_utc.dt.tz_localize(None) >= np.datetime64('2020-04-01 00:00:00')]
-# df = df[df.time_utc.dt.tz_localize(None) < np.datetime64('2020-04-08 00:00:00')]
-
-# # Make a version including period end
-# df_period_end = df.copy(deep=True)
-# df_period_end["time"] = df_period_end["time"] + 299.0
-# df_period_end["time_utc"] = df_period_end["time_utc"] + pd.Timedelta(seconds=299)
-# df = pd.concat([df, df_period_end]).sort_values(by="time")
-# df.time = df.time - df.time.min()
-
-# df.to_csv("one_week_lmp.csv", index=False)
-
 
 # Get the logger
 logger = setup_logging()
@@ -89,7 +68,7 @@ if len(sys.argv) == 2:
 else:
     input_file = "inputs/hercules_input.yaml"
 
-generate_pricing_power_reference(pd.read_csv("inputs/one_week_lmp.csv"))
+generate_day_ahead_prices(pd.read_csv("inputs/one_week_lmp.csv"))
 
 # Initialize logging
 logger.info(f"Starting with input file: {input_file}")

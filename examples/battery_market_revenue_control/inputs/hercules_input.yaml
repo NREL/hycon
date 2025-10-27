@@ -28,4 +28,4 @@ battery:
   initial_conditions:
     SOC: 0.5
 
-external_data_file: power_reference.csv
+external_data_file: lmp_data.csv

@@ -354,3 +354,5 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
         self.battery_reference = battery_reference
 
         return wind_reference, solar_reference, battery_reference
+
+    # TODO: Need to add it's own compute_controls method that ensures interconnect is satisfied

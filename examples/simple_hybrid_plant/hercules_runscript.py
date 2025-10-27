@@ -6,14 +6,13 @@ from hercules.emulator import Emulator
 from hercules.hybrid_plant import HybridPlant
 from hercules.utilities import load_hercules_input, setup_logging
 from hercules.utilities_examples import ensure_example_inputs_exist
-
-from whoc.interfaces import HerculesV2Interface
 from whoc.controllers import (
     BatteryPassthroughController,
     HybridSupervisoryControllerBaseline,
     SolarPassthroughController,
-    WindFarmPowerTrackingController
+    WindFarmPowerTrackingController,
 )
+from whoc.interfaces import HerculesV2Interface
 
 # If the output folder exists, delete it
 if os.path.exists("outputs"):

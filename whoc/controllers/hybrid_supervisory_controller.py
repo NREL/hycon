@@ -41,6 +41,29 @@ class HybridSupervisoryControllerBase(ControllerBase):
         self.prev_solar_power = 0
 
     def compute_controls(self, measurements_dict):
+        # Handle power_reference or plant_power_reference keys
+        if (
+            "power_reference" in measurements_dict
+            and "plant_power_reference" not in measurements_dict
+        ):
+            measurements_dict["plant_power_reference"] = measurements_dict["power_reference"]
+            del measurements_dict["power_reference"]
+        elif (
+            "power_reference" not in measurements_dict
+            and "plant_power_reference" not in measurements_dict
+        ):
+            raise KeyError(
+                "Either 'power_reference' or 'plant_power_reference' must be provided"
+                " in measurements_dict."
+            )
+        elif (
+            "power_reference" in measurements_dict
+            and "plant_power_reference" in measurements_dict
+        ):
+            raise KeyError(
+                "Found both 'power_reference' and 'plant_power_reference' in measurements_dict."
+            )
+
         # Run supervisory control logic
         wind_reference, solar_reference, battery_reference = self.supervisory_control(
             measurements_dict

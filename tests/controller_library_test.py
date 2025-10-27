@@ -672,6 +672,11 @@ def test_HydrogenPlantController():
     test_hercules_dict["py_sims"]["test_solar"]["outputs"]["power_mw"] = 0.0
     test_controller.filtered_power_prev = sum(wind_current) # To override filtering
 
+    # Without removing wind power reference, wind controller can't reconcile its setpoint
+    with pytest.raises(KeyError):
+        test_controller.step(test_hercules_dict)
+    # Remove wind power reference to allow wind controller to operate freely
+    del test_hercules_dict["external_signals"]["wind_power_reference"]
     test_controller.step(test_hercules_dict) # Run the controller once to update measurements
     supervisory_control_output = test_controller.supervisory_control(
         test_controller._measurements_dict

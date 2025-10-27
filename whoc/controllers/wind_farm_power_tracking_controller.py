@@ -32,7 +32,7 @@ class WindFarmPowerDistributingController(ControllerBase):
             and measurements_dict["power_reference"] is not None
         )
         if ref_in_lower_dict and ref_in_upper_dict:
-            raise ValueError(
+            raise KeyError(
                 "Found 'power_reference' in both measurements_dict['"
                 +self.cname+"'] and measurements_dict."
             )

@@ -4,7 +4,6 @@ import shutil
 import sys
 
 import pandas as pd
-import numpy as np
 from hercules.emulator import Emulator
 from hercules.hybrid_plant import HybridPlant
 from hercules.utilities import load_hercules_input, setup_logging

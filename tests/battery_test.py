@@ -1,7 +1,7 @@
 from whoc.controllers.battery_controller import (
     BatteryPriceSOCController,
 )
-from whoc.interfaces import HerculesHybridLongRunInterface
+from whoc.interfaces import HerculesV2Interface
 
 test_hercules_dict = {
     "dt": 1,
@@ -25,7 +25,7 @@ test_hercules_dict = {
 
 
 def test_BatteryPriceSOCController_init():
-    test_interface = HerculesHybridLongRunInterface(test_hercules_dict)
+    test_interface = HerculesV2Interface(test_hercules_dict)
 
     # Initialize controller
     test_controller = BatteryPriceSOCController(test_interface, test_hercules_dict)
@@ -41,7 +41,7 @@ def test_BatteryPriceSOCController_init():
 
 
 def test_BatteryPriceSOCController_compute_controls():
-    test_interface = HerculesHybridLongRunInterface(test_hercules_dict)
+    test_interface = HerculesV2Interface(test_hercules_dict)
 
     # Initialize controller
     test_controller = BatteryPriceSOCController(test_interface, test_hercules_dict)

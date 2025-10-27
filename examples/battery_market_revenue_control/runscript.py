@@ -8,7 +8,7 @@ from hercules.emulator import Emulator
 from hercules.hybrid_plant import HybridPlant
 from hercules.utilities import load_hercules_input, setup_logging
 from whoc.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
-from whoc.interfaces import HerculesHybridLongRunInterface
+from whoc.interfaces import HerculesV2Interface
 
 # If the output folder exists, delete it
 if os.path.exists("outputs"):
@@ -98,12 +98,12 @@ logger.info(f"Starting with input file: {input_file}")
 h_dict = load_hercules_input(input_file)
 
 # Establish the interface and controller
-interface=HerculesHybridLongRunInterface(h_dict)
+interface=HerculesV2Interface(h_dict)
 controller = HybridSupervisoryControllerMultiRef(
     battery_controller=BatteryPriceSOCController(
         interface=interface, input_dict=h_dict
     ),
-    interface=HerculesHybridLongRunInterface(h_dict),
+    interface=HerculesV2Interface(h_dict),
     input_dict=h_dict,
 )
 

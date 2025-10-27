@@ -90,22 +90,15 @@ class HybridSupervisoryControllerBaseline(HybridSupervisoryControllerBase):
 
     def supervisory_control(self, measurements_dict):
         # Extract measurements sent
-        time = measurements_dict["time"] # noqa: F841 
         if self._has_wind_controller:
             wind_power = np.array(measurements_dict["wind_farm"]["turbine_powers"]).sum()
-            wind_speed = measurements_dict["wind_farm"]["wind_speed"] # noqa: F841
         else:
             wind_power = 0
-            wind_speed = 0 # noqa: F841
 
         if self._has_solar_controller:
             solar_power = measurements_dict["solar_farm"]["power"]
-            solar_dni = measurements_dict["solar_farm"]["direct_normal_irradiance"] # noqa: F841
-            solar_aoi = measurements_dict["solar_farm"]["angle_of_incidence"] # noqa: F841
         else:
             solar_power = 0
-            solar_dni = 0 # noqa: F841
-            solar_aoi = 0 # noqa: F841
 
         if self._has_battery_controller:
             battery_power = measurements_dict["battery"]["power"]
@@ -114,7 +107,7 @@ class HybridSupervisoryControllerBaseline(HybridSupervisoryControllerBase):
             battery_power = 0
             battery_soc = 0
 
-        plant_power_reference = measurements_dict["power_reference"]
+        plant_power_reference = measurements_dict["plant_power_reference"]
 
         # Filter the wind and solar power measurements to reduce noise and improve closed-loop
         # controller damping

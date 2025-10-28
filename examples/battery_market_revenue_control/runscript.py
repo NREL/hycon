@@ -9,47 +9,12 @@ from hercules.hybrid_plant import HybridPlant
 from hercules.utilities import load_hercules_input, setup_logging
 from whoc.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
 from whoc.interfaces import HerculesV2Interface
+from whoc.utilities import generate_day_ahead_price_dataframe
 
 # If the output folder exists, delete it
 if os.path.exists("outputs"):
     shutil.rmtree("outputs")
 os.makedirs("outputs")
-
-def generate_day_ahead_prices(df_dayahead_lmp):
-    df = df_dayahead_lmp[df_dayahead_lmp["time"] % 3600 == 0]
-
-    df["datetime"] = pd.to_datetime(df["time_utc"])
-
-    # Extract date and hour
-    df["date"] = df["datetime"].dt.date
-    df["hour"] = df["datetime"].dt.hour
-
-    df_hourly = df.pivot_table(
-        values="lmp_da",
-        index="date",
-        columns="hour",
-        aggfunc="first"  # Use first value if multiple entries per hour
-    )
-    df_hourly = df_hourly.reindex(columns=list(range(24)))
-    df_hourly = df_hourly.rename(columns={h: "DA_LMP_{:02d}".format(h) for h in df_hourly.columns})
-    df_hourly = df_hourly.reset_index()
-
-    # Add back time column and drop unneeded date column
-    df_hourly["time"] = df["time"][0:-1:24].values
-    df_hourly = df_hourly.drop(columns=["date"])
-
-    df = (df_dayahead_lmp[["time", "lmp_rt", "lmp_da"]]
-          .rename(columns={"lmp_rt": "RT_LMP", "lmp_da": "DA_LMP"})
-          .merge(
-            df_hourly,
-            on="time",
-            how="left",
-          )
-          .fillna(method="ffill")
-    )
-
-    df.to_csv("lmp_data.csv", index=False)
-    return None
 
 # Get the logger
 logger = setup_logging()
@@ -67,7 +32,8 @@ if len(sys.argv) == 2:
 else:
     input_file = "inputs/hercules_input.yaml"
 
-generate_day_ahead_prices(pd.read_csv("inputs/one_week_lmp.csv"))
+df_lmp = generate_day_ahead_price_dataframe(pd.read_csv("inputs/one_week_lmp.csv"))
+df_lmp.to_csv("lmp_data.csv", index=False)
 
 # Initialize logging
 logger.info(f"Starting with input file: {input_file}")

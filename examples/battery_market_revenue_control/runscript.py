@@ -9,7 +9,7 @@ from hercules.hybrid_plant import HybridPlant
 from hercules.utilities import load_hercules_input, setup_logging
 from whoc.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
 from whoc.interfaces import HerculesV2Interface
-from whoc.utilities import generate_day_ahead_price_dataframe
+from whoc.utilities import generate_locational_marginal_price_dataframe
 
 # If the output folder exists, delete it
 if os.path.exists("outputs"):
@@ -32,8 +32,11 @@ if len(sys.argv) == 2:
 else:
     input_file = "inputs/hercules_input.yaml"
 
-df_lmp = generate_day_ahead_price_dataframe(pd.read_csv("inputs/one_week_lmp.csv"))
-df_lmp.to_csv("lmp_data.csv", index=False)
+df_lmp = generate_locational_marginal_price_dataframe(
+    pd.read_csv("gridstatus_lmp_day_ahead_april.csv"),
+    pd.read_csv("gridstatus_lmp_real_time_april.csv")
+)
+df_lmp[df_lmp.time <= 604800.0].drop(columns="time_utc").to_csv("lmp_data.csv", index=False)
 
 # Initialize logging
 logger.info(f"Starting with input file: {input_file}")

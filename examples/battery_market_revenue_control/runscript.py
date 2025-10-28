@@ -33,8 +33,8 @@ else:
     input_file = "inputs/hercules_input.yaml"
 
 df_lmp = generate_locational_marginal_price_dataframe(
-    pd.read_csv("gridstatus_lmp_day_ahead_april.csv"),
-    pd.read_csv("gridstatus_lmp_real_time_april.csv")
+    pd.read_csv("inputs/da_lmp.csv"),
+    pd.read_csv("inputs/rt_lmp.csv")
 )
 df_lmp[df_lmp.time <= 604800.0].drop(columns="time_utc").to_csv("lmp_data.csv", index=False)
 

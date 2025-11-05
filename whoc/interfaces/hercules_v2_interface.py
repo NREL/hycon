@@ -130,7 +130,7 @@ class HerculesV2Interface(InterfaceBase):
         if self._has_wind_component:
             measurements["wind_farm"] = {
                 "turbine_powers": h_dict["wind_farm"]["turbine_powers"],
-                "wind_directions": [h_dict["wind_farm"]["wind_direction"]]*self._n_turbines,
+                "wind_directions": [h_dict["wind_farm"]["wind_direction_mean"]]*self._n_turbines,
                 # TODO: wind_speeds?
                 "power_reference": wind_power_reference,
             }

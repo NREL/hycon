@@ -6,8 +6,8 @@ name: simple_hybrid_plant
 description: Floris, Solar PV and Battery Plant Example
 
 dt: 0.5
-starttime: 0.0
-endtime: 7199.5
+starttime_utc: "2018-05-10T12:31:00.00Z"
+endtime_utc: "2018-05-10T14:30:00.00Z"
 verbose: False
 
 plant: 
@@ -19,7 +19,9 @@ wind_farm:
   wind_input_filename: inputs/wind_input.csv
   turbine_file_name: inputs/turbine_filter_model.yaml
   log_file_name: outputs/log_wind_sim.log
-  logging_option: all
+  log_channels:
+    - power
+    - turbine_powers
   floris_update_time_s: 300.0 # Update wakes every 5 minutes
 
 solar_farm:
@@ -32,7 +34,10 @@ solar_farm:
     system_capacity: 100000 # kW
     tilt: 0  # degrees
     losses: 0
-    logging_option: all
+    log_channels:
+      - power
+      - dni
+      - aoi
 
     initial_conditions:
       power: 25000 # kW
@@ -50,5 +55,8 @@ battery:
   allow_grid_power_consumption: True
   initial_conditions:
     SOC: 0.88   # initial state of charge of the battery in percentage of total size
+  log_channels:
+    - power
+    - soc
 
 external_data_file: inputs/plant_power_reference.csv

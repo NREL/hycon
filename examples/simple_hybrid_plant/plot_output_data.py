@@ -65,25 +65,23 @@ if not (battery_power == 0).all():
     ax[1].set_xlabel("Time [mins]")
     ax[1].grid()
 
-# Plot the solar data, if solar component included
-# TODO: This does not yet work and will need to be updated once advanced solar logging is enabled
-# in Hercules.
-# if (solar_power == 0).all():
-#     angle_of_incidence = df["py_sims.solar_farm_0.outputs.aoi"]
-#     direct_normal_irradiance = df["py_sims.solar_farm_0.outputs.dni"]
-#     fig, ax = plt.subplots(3, 1, sharex=True, figsize=(7,5))
-#     ax[0].plot(time, solar_power/1e3, color="C1")
-#     ax[0].set_ylabel("Solar power [MW]")
-#     ax[0].grid()
+# Plot the solar data, if solar component included in Hercules.
+if not (solar_power == 0).all():
+    angle_of_incidence = df["solar_farm.aoi"]
+    direct_normal_irradiance = df["solar_farm.dni"]
+    fig, ax = plt.subplots(3, 1, sharex=True, figsize=(7,5))
+    ax[0].plot(time, solar_power/1e3, color="C1")
+    ax[0].set_ylabel("Solar power [MW]")
+    ax[0].grid()
 
-#     ax[1].plot(time, direct_normal_irradiance, color="black")
-#     ax[1].set_ylabel("DNI [W/m$^2$]")
-#     ax[1].grid()
+    ax[1].plot(time, direct_normal_irradiance, color="black")
+    ax[1].set_ylabel("DNI [W/m$^2$]")
+    ax[1].grid()
 
-#     ax[2].plot(time, angle_of_incidence, color="black")
-#     ax[2].set_ylabel("AOI [deg]")
-#     ax[-1].set_xlabel("Time [mins]")
-#     ax[2].grid()
+    ax[2].plot(time, angle_of_incidence, color="black")
+    ax[2].set_ylabel("AOI [deg]")
+    ax[-1].set_xlabel("Time [mins]")
+    ax[2].grid()
 
 # Plot the wind data
 wind_power_individuals = df[["wind_farm.turbine_powers.{0:03d}".format(t)

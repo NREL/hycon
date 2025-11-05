@@ -92,7 +92,7 @@ test_hercules_v2_dict = {
     "wind_farm": {
         "n_turbines": 2,
         "capacity": 10000.0,
-        "wind_direction": 271.0,
+        "wind_direction_mean": 271.0,
         "turbine_powers": [4000.0, 4001.0],
         "wind_speed": 10.0,
     },

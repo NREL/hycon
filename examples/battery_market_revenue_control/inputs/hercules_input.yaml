@@ -8,8 +8,8 @@ name: example_03
 description: Battery alone
 
 dt: 1.0
-starttime: 0.0
-endtime: 604800.0
+starttime_utc: "2020-04-01T00:00:00Z"
+endtime_utc: "2020-04-07T23:55:00Z"
 verbose: False
 
 
@@ -27,5 +27,9 @@ battery:
   allow_grid_power_consumption: True
   initial_conditions:
     SOC: 0.5
+  log_channels:
+    - power
+    - soc
+    - power_setpoint
 
 external_data_file: lmp_data.csv

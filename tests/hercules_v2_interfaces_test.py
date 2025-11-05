@@ -13,7 +13,7 @@ test_hercules_dict = {
     "wind_farm": {
         "n_turbines": 2,
         "capacity": 10000.0,
-        "wind_direction": 271.0,
+        "wind_direction_mean": 271.0,
         "turbine_powers": [4000.0, 4001.0],
         "wind_speed": 10.0,
     },
@@ -68,7 +68,7 @@ def test_HerculesV2Interface_windonly():
     assert measurements["time"] == test_hercules_dict["time"]
     assert (
         measurements["wind_farm"]["wind_directions"]
-        == [test_hercules_dict["wind_farm"]["wind_direction"]] * 2
+        == [test_hercules_dict["wind_farm"]["wind_direction_mean"]] * 2
     )
     assert (
         measurements["wind_farm"]["turbine_powers"]
@@ -129,7 +129,7 @@ def test_HerculesV2Interface_hybrid():
     assert measurements["time"] == test_hercules_dict["time"]
     assert (
         measurements["wind_farm"]["wind_directions"]
-        == [test_hercules_dict["wind_farm"]["wind_direction"]] * 2
+        == [test_hercules_dict["wind_farm"]["wind_direction_mean"]] * 2
     )
     assert (
         measurements["wind_farm"]["turbine_powers"]

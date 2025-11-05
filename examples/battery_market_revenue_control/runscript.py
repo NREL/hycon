@@ -14,7 +14,7 @@ df_lmp = generate_locational_marginal_price_dataframe(
     pd.read_csv("inputs/da_lmp.csv"),
     pd.read_csv("inputs/rt_lmp.csv")
 )
-df_lmp.drop(columns="time").to_csv("lmp_data.csv", index=False)
+df_lmp.to_csv("lmp_data.csv", index=False)
 
 # Load the input file and establish the Hercules model
 hmodel = HerculesModel("inputs/hercules_input.yaml")

@@ -41,17 +41,39 @@ ax.plot(
     linewidth=0.5,
 )
 
-# Process and plot the day ahead top and bottom 4 and 1
-da_lmps = df[["external_signals.DA_LMP_{:02d}".format(h) for h in range(24)]].to_numpy()
-da_lmps_sorted = np.sort(da_lmps, axis=1)
-b4 = da_lmps_sorted[:, 3]
-t4 = da_lmps_sorted[:, -4]
-b1 = da_lmps_sorted[:, 0]
-t1 = da_lmps_sorted[:, -1]
+# Process and plot the day ahead top and bottom 4 and 1 for each midnight to midnight (UTC) period
+df_reduced = df[["time_utc", "external_signals.DA_LMP"]].copy()
+
+# Create an hourly version for the DA LMP (drop all periods that aren't on an hour)
+df_hr = df_reduced[df_reduced["time_utc"].dt.minute == 0].copy(deep=True)
+
+# Extract date and hour for use in pivot_table
+df_hr["date"] = df_hr["time_utc"].dt.date
+df_hr["hour"] = df_hr["time_utc"].dt.hour
+
+df_hourly = df_hr.pivot_table(
+    values="external_signals.DA_LMP",
+    index="date",
+    columns="hour",
+    aggfunc="first",  # Use first value if multiple entries per hour
+)
+day_hour = df_hourly.to_numpy()
+sorted_day_hour = np.sort(day_hour, axis=1)
+df_hourly["B4"] = sorted_day_hour[:, 3]
+df_hourly["T4"] = sorted_day_hour[:, -4]
+df_hourly["B1"] = sorted_day_hour[:, 0]
+df_hourly["T1"] = sorted_day_hour[:, -1]
+
+df = df.merge(
+    df_hourly[["B4", "T4", "B1", "T1"]],
+    left_on=df["time_utc"].dt.date,
+    right_on=df_hourly.index,
+    how="left",
+).ffill()
 
 ax.fill_between(
     df["time"],
-    t4,
+    df["T4"],
     500,
     label="Main discharge price (daily)",
     color="C2",
@@ -60,7 +82,7 @@ ax.fill_between(
 )
 ax.fill_between(
     df["time"],
-    t1,
+    df["T1"],
     500,
     label="High discharge price (daily)",
     color="C2",
@@ -70,7 +92,7 @@ ax.fill_between(
 ax.fill_between(
     df["time"],
     -500,
-    b4,
+    df["B4"],
     label="Main charge price (daily)",
     color="C1",
     alpha=0.3,
@@ -79,7 +101,7 @@ ax.fill_between(
 ax.fill_between(
     df["time"],
     -500,
-    b1,
+    df["B1"],
     label="Low charge price (daily)",
     color="C1",
     alpha=0.5,

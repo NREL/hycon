@@ -1,7 +1,9 @@
 # Requires Hercules v2
 
 import pandas as pd
-from hercules.grid.grid_utilities import generate_locational_marginal_price_dataframe
+from hercules.grid.grid_utilities import (
+    generate_locational_marginal_price_dataframe_from_gridstatus,
+)
 from hercules.hercules_model import HerculesModel
 from hercules.utilities_examples import prepare_output_directory
 from whoc.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
@@ -10,7 +12,7 @@ from whoc.interfaces import HerculesV2Interface
 prepare_output_directory()
 
 # Generate the LMP data needed for the simulation
-df_lmp = generate_locational_marginal_price_dataframe(
+df_lmp = generate_locational_marginal_price_dataframe_from_gridstatus(
     pd.read_csv("inputs/da_lmp.csv"),
     pd.read_csv("inputs/rt_lmp.csv")
 )

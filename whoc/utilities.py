@@ -1,4 +1,3 @@
-import pandas as pd
 from floris.utilities import wrap_180
 
 

@@ -13,8 +13,8 @@ prepare_output_directory()
 
 # Generate the LMP data needed for the simulation
 df_lmp = generate_locational_marginal_price_dataframe_from_gridstatus(
-    pd.read_csv("inputs/da_lmp.csv"),
-    pd.read_csv("inputs/rt_lmp.csv")
+    pd.read_csv("inputs/lmp_da.csv"),
+    pd.read_csv("inputs/lmp_rt.csv")
 )
 df_lmp.to_csv("lmp_data.csv", index=False)
 

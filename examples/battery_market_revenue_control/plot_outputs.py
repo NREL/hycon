@@ -26,23 +26,23 @@ ax = axarr[0]
 
 ax.plot(
     df["time"],
-    df["external_signals.DA_LMP"],
-    label="DA LMP",
+    df["external_signals.lmp_da"],
+    label="Day-ahead LMP",
     color="k",
     linestyle="--",
     linewidth=0.5,
 )
 ax.plot(
     df["time"],
-    df["external_signals.RT_LMP"],
-    label="RT LMP",
+    df["external_signals.lmp_rt"],
+    label="Real-time LMP",
     color="k",
     linestyle="-",
     linewidth=0.5,
 )
 
 # Process and plot the day ahead top and bottom 4 and 1 for each midnight to midnight (UTC) period
-df_reduced = df[["time_utc", "external_signals.DA_LMP"]].copy()
+df_reduced = df[["time_utc", "external_signals.lmp_da"]].copy()
 
 # Create an hourly version for the DA LMP (drop all periods that aren't on an hour)
 df_hr = df_reduced[df_reduced["time_utc"].dt.minute == 0].copy(deep=True)
@@ -52,7 +52,7 @@ df_hr["date"] = df_hr["time_utc"].dt.date
 df_hr["hour"] = df_hr["time_utc"].dt.hour
 
 df_hourly = df_hr.pivot_table(
-    values="external_signals.DA_LMP",
+    values="external_signals.lmp_da",
     index="date",
     columns="hour",
     aggfunc="first",  # Use first value if multiple entries per hour
@@ -148,7 +148,7 @@ for ax in axarr:
 # Compute total revenue on real-time market
 df["revenue_rt"] = (
     df["battery.power"]/1e3
-    * df["external_signals.RT_LMP"]
+    * df["external_signals.lmp_rt"]
     / 3600
 )
 print("Real-time revenue over simulation: ${:.1f}".format(df["revenue_rt"].sum()))

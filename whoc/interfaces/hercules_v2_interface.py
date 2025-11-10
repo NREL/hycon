@@ -148,12 +148,12 @@ class HerculesV2Interface(InterfaceBase):
                 )
 
             # Grid price information
-            if "DA_LMP_00" in h_dict["external_signals"]:
+            if "lmp_da_00" in h_dict["external_signals"]:
                 measurements["DA_LMP"] = [
-                    h_dict["external_signals"]["DA_LMP_{:02d}".format(h)] for h in range(24)
+                    h_dict["external_signals"]["lmp_da_{:02d}".format(h)] for h in range(24)
                 ]
-            if "RT_LMP" in h_dict["external_signals"]:
-                measurements["RT_LMP"] = h_dict["external_signals"]["RT_LMP"]
+            if "lmp_rt" in h_dict["external_signals"]:
+                measurements["RT_LMP"] = h_dict["external_signals"]["lmp_rt"]
 
             # Special handling for forecast elements
             for k in h_dict["external_signals"].keys():

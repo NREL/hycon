@@ -196,15 +196,15 @@ class BatteryPriceSOCController(ControllerBase):
 
     def compute_controls(self, measurements_dict):
 
-        day_ahead_lmps = np.array(measurements_dict["DA_LMP"])
-        sorted_lmps = np.sort(day_ahead_lmps)
+        day_ahead_lmps = np.array(measurements_dict["DA_LMP_24hours"])
+        sorted_day_ahead_lmps = np.sort(day_ahead_lmps)
         real_time_lmp = measurements_dict["RT_LMP"]
 
         # Extract limits
-        bottom_4 = sorted_lmps[3]
-        top_4 = sorted_lmps[-4]
-        bottom_1 = sorted_lmps[0]
-        top_1 = sorted_lmps[-1]
+        bottom_4 = sorted_day_ahead_lmps[3]
+        top_4 = sorted_day_ahead_lmps[-4]
+        bottom_1 = sorted_day_ahead_lmps[0]
+        top_1 = sorted_day_ahead_lmps[-1]
 
         # Access the state of charge and LMP in real-time
         soc = measurements_dict["battery"]["state_of_charge"]

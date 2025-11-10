@@ -54,7 +54,7 @@ def test_BatteryPriceSOCController_compute_controls():
     measurement_dict = {
         "battery": {"state_of_charge": 0.9},
         "RT_LMP": 3,
-        "DA_LMP": DA_LMP_test,
+        "DA_LMP_24hours": DA_LMP_test,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
@@ -68,7 +68,7 @@ def test_BatteryPriceSOCController_compute_controls():
     measurement_dict = {
         "battery": {"state_of_charge": 0.9},
         "RT_LMP": 22,
-        "DA_LMP": DA_LMP_test,
+        "DA_LMP_24hours": DA_LMP_test,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == 0.0
@@ -81,7 +81,7 @@ def test_BatteryPriceSOCController_compute_controls():
     measurement_dict = {
         "battery": {"state_of_charge": 0.5},
         "RT_LMP": 2,
-        "DA_LMP": DA_LMP_test,
+        "DA_LMP_24hours": DA_LMP_test,
     }
     controls_dict = test_controller.compute_controls(measurement_dict)
     assert controls_dict["power_setpoint"] == -test_controller.rated_power_charging

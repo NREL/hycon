@@ -152,6 +152,8 @@ class HerculesV2Interface(InterfaceBase):
                 measurements["DA_LMP_24hours"] = [
                     h_dict["external_signals"]["lmp_da_{:02d}".format(h)] for h in range(24)
                 ]
+            if "lmp_da" in h_dict["external_signals"]:
+                measurements["DA_LMP"] = h_dict["external_signals"]["lmp_da"]
             if "lmp_rt" in h_dict["external_signals"]:
                 measurements["RT_LMP"] = h_dict["external_signals"]["lmp_rt"]
 

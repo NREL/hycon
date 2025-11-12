@@ -1,3 +1,5 @@
+import copy
+
 from whoc.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_DEFAULT
 from whoc.interfaces.interface_base import InterfaceBase
 
@@ -12,13 +14,13 @@ class HerculesV2Interface(InterfaceBase):
 
         # Controller parameters
         if "controller" in h_dict and h_dict["controller"] is not None:
-            self.controller_parameters = h_dict["controller"]
+            self.controller_parameters = copy.deepcopy(h_dict["controller"])
         else:
             self.controller_parameters = {}
 
         # Plant parameters
         if "plant" in h_dict and h_dict["plant"] is not None:
-            self.plant_parameters = h_dict["plant"]
+            self.plant_parameters = copy.deepcopy(h_dict["plant"])
         else:
             self.plant_parameters = {}
 

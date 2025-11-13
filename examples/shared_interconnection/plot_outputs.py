@@ -1,7 +1,6 @@
 # Plot the outputs of the simulation for the wind and storage example
 
 import matplotlib.pyplot as plt
-import numpy as np
 from hercules import HerculesOutput
 
 # Read the Hercules output file using HerculesOutput

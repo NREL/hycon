@@ -13,13 +13,13 @@ prepare_output_directory()
 
 # Generate the LMP data needed for the simulation
 df_lmp = generate_locational_marginal_price_dataframe_from_gridstatus(
-    pd.read_csv("inputs/lmp_da.csv"),
-    pd.read_csv("inputs/lmp_rt.csv")
+    pd.read_csv("../shared_inputs/lmp_da.csv"),
+    pd.read_csv("../shared_inputs/lmp_rt.csv")
 )
 df_lmp.to_csv("lmp_data.csv", index=False)
 
 # Load the input file and establish the Hercules model
-hmodel = HerculesModel("inputs/hercules_input.yaml")
+hmodel = HerculesModel("hercules_input.yaml")
 
 # Establish the interface and controller, assign to the Hercules model
 interface=HerculesV2Interface(hmodel.h_dict)

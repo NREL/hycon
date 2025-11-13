@@ -2,6 +2,7 @@ import numpy as np
 
 from whoc.controllers.controller_base import ControllerBase
 
+POWER_SETPOINT_DEFAULT = 10e9
 
 class HybridSupervisoryControllerBase(ControllerBase):
     """
@@ -355,4 +356,148 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
 
         return wind_reference, solar_reference, battery_reference
 
-    # TODO: Need to add it's own compute_controls method that ensures interconnect is satisfied
+
+class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
+    """
+    Hybrid controller that activates generation and battery based on the real-time locational
+    locational marginal price for each component.
+    """
+    def __init__(
+            self,
+            interface,
+            input_dict,
+            wind_controller=None,
+            solar_controller=None,
+            battery_controller=None,
+            controller_parameters={},
+            verbose=False
+        ):
+        super().__init__(
+            interface=interface,
+            input_dict=input_dict,
+            wind_controller=wind_controller,
+            solar_controller=solar_controller,
+            battery_controller=battery_controller,
+            verbose=verbose
+        )
+
+            # Extract interconnection limit
+        if "interconnect_limit" in self.plant_parameters:
+            if (not isinstance(self.plant_parameters["interconnect_limit"], (float, int))
+                or self.plant_parameters["interconnect_limit"] <= 0):
+                raise ValueError("interconnect_limit must be a positive value.")
+        else:
+            self.plant_parameters["interconnect_limit"] = np.inf
+
+        # Check that parameters are not specified both in input file
+        # and in controller_parameters
+        for cp in controller_parameters.keys():
+            if cp in input_dict["controller"]:
+                raise KeyError(
+                    "Found key \""+cp+"\" in both input_dict[\"controller\"] and"
+                    " in controller_parameters."
+                )
+        controller_parameters = {**controller_parameters, **input_dict["controller"]}
+        self.set_controller_parameters(**controller_parameters)
+
+    def set_controller_parameters(
+        self,
+        wind_price_threshold=0.0,
+        solar_price_threshold=0.0,
+        curtailment_order=None
+    ):
+        # Establish curtailment protocols
+        default_curtailment_order = ["battery", "solar", "wind"]
+        default_curtailment_order = [
+            c for c, a in zip(
+                default_curtailment_order,
+                [self._has_battery_controller,
+                 self._has_solar_controller,
+                 self._has_wind_controller
+                ]
+            ) if a
+        ]
+        if curtailment_order is not None:
+            # Check that curtailment order does not contain any invalid components
+            for component in curtailment_order:
+                if component not in default_curtailment_order:
+                    raise ValueError(
+                        f"Invalid component {component} in curtailment_order. "
+                        "Valid components based on configuration provided are: "
+                        ", ".join(default_curtailment_order)
+                    )
+            self.curtailment_order = curtailment_order
+        else:
+            self.curtailment_order = default_curtailment_order
+        # TODO: consider adding a price-ordered version of curtailment order.
+
+        self.wind_price_threshold = wind_price_threshold
+        self.solar_price_threshold = solar_price_threshold
+
+    def supervisory_control(self, measurements_dict):
+        """
+        Overwrite HybridSupervisoryControllerBaseline.supervisory_control()
+        with controller that follows separate setpoints and curtails in order.
+        """
+
+        # Get current power production of the various components
+        wind_power = (
+            np.array(measurements_dict["wind_farm"]["turbine_powers"]).sum()
+            if self._has_wind_controller
+            else 0
+        )
+        solar_power = measurements_dict["solar_farm"]["power"] if self._has_solar_controller else 0
+        battery_power = measurements_dict["battery"]["power"] if self._has_battery_controller else 0
+
+        # Initialize references
+        wind_reference = 0.0
+        solar_reference = 0.0
+        battery_reference = 0.0
+
+        # Set references for each component based on price thresholds, curtailment order
+        unconstrained_power = 0.0
+
+        for component in reversed(self.curtailment_order):
+            if component == "wind":
+                if measurements_dict["RT_LMP"] < self.wind_price_threshold:
+                    wind_reference = 0
+                elif (
+                    unconstrained_power + wind_power
+                    <= self.plant_parameters["interconnect_limit"]
+                ):
+                    wind_reference = POWER_SETPOINT_DEFAULT
+                    unconstrained_power += wind_power
+                else:
+                    wind_reference = (
+                        self.plant_parameters["interconnect_limit"] - unconstrained_power
+                    )
+                    unconstrained_power += wind_power
+            elif component == "solar":
+                if measurements_dict["RT_LMP"] < self.solar_price_threshold:
+                    solar_reference = 0
+                elif (
+                    unconstrained_power + solar_power
+                    <= self.plant_parameters["interconnect_limit"]
+                ):
+                    solar_reference = POWER_SETPOINT_DEFAULT
+                    unconstrained_power += solar_power
+                else:
+                    solar_reference = (
+                        self.plant_parameters["interconnect_limit"] - unconstrained_power
+                    )
+                    unconstrained_power += solar_power
+            elif component == "battery":
+                if (
+                    unconstrained_power + battery_power
+                    <= self.plant_parameters["interconnect_limit"]
+                ):
+                    # Upper bound for battery
+                    battery_reference = self.plant_parameters["battery"]["discharge_rate"]
+                    unconstrained_power += battery_power
+                else:
+                    battery_reference = (
+                        self.plant_parameters["interconnect_limit"] - unconstrained_power
+                    )
+                    unconstrained_power += battery_power
+
+        return wind_reference, solar_reference, battery_reference

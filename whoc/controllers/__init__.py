@@ -6,6 +6,7 @@ from whoc.controllers.battery_controller import (
 from whoc.controllers.hybrid_supervisory_controller import (
     HybridSupervisoryControllerBaseline,
     HybridSupervisoryControllerMultiRef,
+    HybridSupervisoryControllerPriceBased,
 )
 from whoc.controllers.hydrogen_plant_controller import HydrogenPlantController
 from whoc.controllers.lookup_based_wake_steering_controller import LookupBasedWakeSteeringController

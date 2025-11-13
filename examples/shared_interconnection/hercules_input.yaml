@@ -1,0 +1,72 @@
+# Input YAML for hercules
+
+# Name
+name: shared_interconnection
+
+###
+# Describe this emulator setup
+description: Wind, solar, and battery sharing an interconnection
+
+dt: 1.0
+starttime_utc: "2018-05-10T12:31:00.00Z"
+endtime_utc: "2018-05-10T14:30:00.00Z"
+verbose: False
+
+
+plant:
+  interconnect_limit: 100000 # kW
+
+wind_farm:
+  component_type: Wind_MesoToPowerPrecomFloris
+  floris_input_file: ../shared_inputs/floris_input.yaml
+  wind_input_filename: ../shared_inputs/wind_input.csv
+  turbine_file_name: ../shared_inputs/turbine_filter_model.yaml
+  log_file_name: outputs/log_wind_sim.log
+  log_channels:
+    - power
+    - turbine_powers
+  floris_update_time_s: 300.0 # Update wakes every 5 minutes
+
+solar_farm:
+    component_type: SolarPySAMPVWatts
+    solar_input_filename: ../shared_inputs/NonAnnualSimulation-sample_data-interpolated-daytime.csv
+    system_info_file_name: ../shared_inputs/100MW_1axis_pvsamv1.json
+    lat: 39.7442
+    lon: -105.1778
+    elev: 1829
+    system_capacity: 100000 # kW
+    tilt: 0  # degrees
+    losses: 0
+    log_channels:
+      - power
+      - dni
+      - aoi
+
+    initial_conditions:
+      power: 25000 # kW
+      dni: 1000
+      poa: 1000
+
+battery:
+  component_type: BatterySimple
+  size: 10000 # kW size of the battery (10 MW)
+  energy_capacity: 40000 # total capacity of the battery in kWh (10 MWh)
+  charge_rate: 10000 # charge rate in kW (10 MW)
+  discharge_rate: 10000 # discharge rate in kW (10 MW)
+  max_SOC: 0.9
+  min_SOC: 0.1
+  allow_grid_power_consumption: False
+  initial_conditions:
+    SOC: 0.5
+  log_channels:
+    - power
+    - soc
+    - power_setpoint
+
+controller:
+  curtailment_order: [battery, solar, wind]
+  wind_price_threshold: -3.0
+  solar_price_threshold: 0.0
+
+external_data:
+  external_data_file: lmp_data.csv

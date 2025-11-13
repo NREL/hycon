@@ -11,7 +11,7 @@ from whoc.interfaces import HerculesV2Interface
 
 prepare_output_directory()
 
-h_dict = load_hercules_input("inputs/hercules_input.yaml")
+h_dict = load_hercules_input("hercules_input.yaml")
 
 # User options
 include_solar = True

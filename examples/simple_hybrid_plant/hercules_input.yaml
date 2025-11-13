@@ -15,9 +15,9 @@ plant:
 
 wind_farm:
   component_type: Wind_MesoToPowerPrecomFloris
-  floris_input_file: inputs/floris_input.yaml
-  wind_input_filename: inputs/wind_input.csv
-  turbine_file_name: inputs/turbine_filter_model.yaml
+  floris_input_file: ../shared_inputs/floris_input.yaml
+  wind_input_filename: ../shared_inputs/wind_input.csv
+  turbine_file_name: ../shared_inputs/turbine_filter_model.yaml
   log_file_name: outputs/log_wind_sim.log
   log_channels:
     - power
@@ -26,8 +26,8 @@ wind_farm:
 
 solar_farm:
     component_type: SolarPySAMPVWatts
-    solar_input_filename: inputs/NonAnnualSimulation-sample_data-interpolated-daytime.csv
-    system_info_file_name: inputs/100MW_1axis_pvsamv1.json
+    solar_input_filename: ../shared_inputs/NonAnnualSimulation-sample_data-interpolated-daytime.csv
+    system_info_file_name: ../shared_inputs/100MW_1axis_pvsamv1.json
     lat: 39.7442
     lon: -105.1778
     elev: 1829
@@ -59,4 +59,4 @@ battery:
     - power
     - soc
 
-external_data_file: inputs/plant_power_reference.csv
+external_data_file: plant_power_reference.csv

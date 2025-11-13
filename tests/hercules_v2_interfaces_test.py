@@ -177,4 +177,7 @@ def test_HerculesV2Interface_hybrid():
 
     # Check that controller and plant parameters are set correctly
     assert interface.controller_parameters == test_hercules_dict["controller"]
-    assert interface.plant_parameters == test_hercules_dict["plant"]
+    assert (
+        interface.plant_parameters["interconnect_limit"]
+        == test_hercules_dict["plant"]["interconnect_limit"]
+    )

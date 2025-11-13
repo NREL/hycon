@@ -479,10 +479,12 @@ def test_HybridSupervisoryControllerMultiRef_requirements():
 
     test_hercules_v2_dict_temp["plant"]["interconnect_limit"] = "1"
     with pytest.raises(ValueError):
+        interface = HerculesV2Interface(test_hercules_v2_dict_temp)
         HybridSupervisoryControllerMultiRef(interface, test_hercules_v2_dict_temp)
         
     test_hercules_v2_dict_temp["plant"]["interconnect_limit"] = -1
     with pytest.raises(ValueError):
+        interface = HerculesV2Interface(test_hercules_v2_dict_temp)
         HybridSupervisoryControllerMultiRef(interface, test_hercules_v2_dict_temp)
 
 def test_HybridSupervisoryControllerMultiRef():

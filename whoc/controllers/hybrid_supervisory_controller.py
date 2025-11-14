@@ -401,9 +401,10 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
         self.set_controller_parameters(**controller_parameters)
 
         # Set initial values for filtered powers
-        self._wind_power_filtered = 0.0
-        self._solar_power_filtered = 0.0
-        self._battery_power_filtered = 0.0
+        self._wind_ref_filtered = 0.0
+        self._solar_ref_filtered = 0.0
+        self._batt_charge_lim_filtered = 0.0
+        self._batt_discharge_lim_filtered = 0.0
 
     def set_controller_parameters(
         self,
@@ -459,12 +460,6 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
         solar_power = measurements_dict["solar_farm"]["power"] if self._has_solar_controller else 0
         battery_power = measurements_dict["battery"]["power"] if self._has_battery_controller else 0
 
-        self._wind_power_filtered = self._a * self._wind_power_filtered + self._b * wind_power
-        self._solar_power_filtered = self._a * self._solar_power_filtered + self._b * solar_power
-        self._battery_power_filtered = (
-            self._a * self._battery_power_filtered + self._b * battery_power
-        )
-
         # Initialize references
         wind_reference = 0.0
         solar_reference = 0.0
@@ -479,51 +474,65 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
                 if measurements_dict["RT_LMP"] < self.wind_price_threshold:
                     wind_reference = 0
                 elif (
-                    unconstrained_power + self._wind_power_filtered
+                    unconstrained_power + wind_power
                     <= self.plant_parameters["interconnect_limit"]
                 ):
                     wind_reference = POWER_SETPOINT_DEFAULT
-                    unconstrained_power += self._wind_power_filtered
+                    unconstrained_power += wind_power
                 else:
                     wind_reference = (
                         self.plant_parameters["interconnect_limit"] - unconstrained_power
                     )
-                    unconstrained_power += self._wind_power_filtered
+                    unconstrained_power += wind_power
             elif component == "solar":
                 if measurements_dict["RT_LMP"] < self.solar_price_threshold:
                     solar_reference = 0
                 elif (
-                    unconstrained_power + self._solar_power_filtered
+                    unconstrained_power + solar_power
                     <= self.plant_parameters["interconnect_limit"]
                 ):
                     solar_reference = POWER_SETPOINT_DEFAULT
-                    unconstrained_power += self._solar_power_filtered
+                    unconstrained_power += solar_power
                 else:
                     solar_reference = (
                         self.plant_parameters["interconnect_limit"] - unconstrained_power
                     )
-                    unconstrained_power += self._solar_power_filtered
+                    unconstrained_power += solar_power
             elif component == "battery":
                 if (
-                    unconstrained_power + self._battery_power_filtered
+                    unconstrained_power + battery_power
                     <= self.plant_parameters["interconnect_limit"]
                 ):
                     # Upper bound for battery
                     battery_discharge_limit = self.plant_parameters["battery"]["discharge_rate"]
-                    unconstrained_power += self._battery_power_filtered
+                    unconstrained_power += battery_power
                 else:
                     battery_discharge_limit = (
                         self.plant_parameters["interconnect_limit"] - unconstrained_power
                     )
-                    unconstrained_power += self._battery_power_filtered
+                    unconstrained_power += battery_power
 
                 if self.plant_parameters["battery"]["allow_grid_power_consumption"]:
                     battery_charge_limit = -self.plant_parameters["interconnect_limit"]
                 else:
-                    # TODO: could consider using unfiltered version here.
-                    battery_charge_limit = -(self._solar_power_filtered + self._wind_power_filtered)
+                    battery_charge_limit = -(solar_power + wind_power)
 
-        return wind_reference, solar_reference, battery_discharge_limit, battery_charge_limit
+        # Apply filtering to set points sent back to component controllers
+        self._wind_ref_filtered = self._a * self._wind_ref_filtered + self._b * wind_reference
+        self._solar_ref_filtered = self._a * self._solar_ref_filtered + self._b * solar_reference
+        self._batt_charge_lim_filtered = (
+            self._a * self._batt_charge_lim_filtered + self._b * battery_charge_limit
+        )
+        self._batt_discharge_lim_filtered = (
+            self._a * self._batt_discharge_lim_filtered + self._b * battery_discharge_limit
+        )
+
+        return (
+            self._wind_ref_filtered,
+            self._solar_ref_filtered,
+            self._batt_discharge_lim_filtered,
+            self._batt_charge_lim_filtered,
+        )
 
     def compute_controls(self, measurements_dict):
         # Run supervisory control logic

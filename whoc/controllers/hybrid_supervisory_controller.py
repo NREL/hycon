@@ -460,63 +460,49 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
         solar_power = measurements_dict["solar_farm"]["power"] if self._has_solar_controller else 0
         battery_power = measurements_dict["battery"]["power"] if self._has_battery_controller else 0
 
+        total_power = wind_power + solar_power + battery_power
+        interconnect_headroom = self.plant_parameters["interconnect_limit"] - total_power
+
         # Initialize references
         wind_reference = 0.0
         solar_reference = 0.0
         battery_charge_limit = 0.0
         battery_discharge_limit = 0.0
 
-        # Set references for each component based on price thresholds, curtailment order
-        unconstrained_power = 0.0
-
-        for component in reversed(self.curtailment_order):
+        for component in self.curtailment_order:
             if component == "wind":
                 if measurements_dict["RT_LMP"] < self.wind_price_threshold:
                     wind_reference = 0
-                elif (
-                    unconstrained_power + wind_power
-                    <= self.plant_parameters["interconnect_limit"]
-                ):
-                    wind_reference = POWER_SETPOINT_DEFAULT
-                    unconstrained_power += wind_power
                 else:
-                    wind_reference = (
-                        self.plant_parameters["interconnect_limit"] - unconstrained_power
+                    wind_reference = np.maximum(
+                        0.0,
+                        wind_power + interconnect_headroom
                     )
-                    unconstrained_power += wind_power
+                #limited_total_power -= self._wind_ref_filtered
             elif component == "solar":
                 if measurements_dict["RT_LMP"] < self.solar_price_threshold:
                     solar_reference = 0
-                elif (
-                    unconstrained_power + solar_power
-                    <= self.plant_parameters["interconnect_limit"]
-                ):
-                    solar_reference = POWER_SETPOINT_DEFAULT
-                    unconstrained_power += solar_power
                 else:
-                    solar_reference = (
-                        self.plant_parameters["interconnect_limit"] - unconstrained_power
+                    solar_reference = np.maximum(
+                        0.0,
+                        solar_power + interconnect_headroom
                     )
-                    unconstrained_power += solar_power
+                #limited_total_power -= self._solar_ref_filtered
             elif component == "battery":
-                if (
-                    unconstrained_power + battery_power
-                    <= self.plant_parameters["interconnect_limit"]
-                ):
-                    # Upper bound for battery
-                    battery_discharge_limit = self.plant_parameters["battery"]["discharge_rate"]
-                    unconstrained_power += battery_power
+                if interconnect_headroom <= 0:
+                    battery_discharge_limit = 0.0
                 else:
-                    battery_discharge_limit = (
-                        self.plant_parameters["interconnect_limit"] - unconstrained_power
+                    battery_discharge_limit = np.minimum(
+                        self.plant_parameters["battery"]["discharge_rate"],
+                        battery_power + interconnect_headroom
                     )
-                    unconstrained_power += battery_power
 
                 if self.plant_parameters["battery"]["allow_grid_power_consumption"]:
                     battery_charge_limit = -self.plant_parameters["interconnect_limit"]
                 else:
                     battery_charge_limit = -(solar_power + wind_power)
 
+        
         # Apply filtering to set points sent back to component controllers
         self._wind_ref_filtered = self._a * self._wind_ref_filtered + self._b * wind_reference
         self._solar_ref_filtered = self._a * self._solar_ref_filtered + self._b * solar_reference

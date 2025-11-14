@@ -400,11 +400,18 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
         controller_parameters = {**controller_parameters, **input_dict["controller"]}
         self.set_controller_parameters(**controller_parameters)
 
+        # Set initial values for filtered powers
+        self._wind_power_filtered = 0.0
+        self._solar_power_filtered = 0.0
+        self._battery_power_filtered = 0.0
+
     def set_controller_parameters(
         self,
         wind_price_threshold=0.0,
         solar_price_threshold=0.0,
-        curtailment_order=None
+        filter_time_constant=0.0,
+        curtailment_order=None,
+        **_ # <- Allows arbitrary additional parameters to be passed, which are ignored
     ):
         # Establish curtailment protocols
         default_curtailment_order = ["battery", "solar", "wind"]
@@ -434,6 +441,9 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
         self.wind_price_threshold = wind_price_threshold
         self.solar_price_threshold = solar_price_threshold
 
+        self._b = self.dt / (filter_time_constant + self.dt)
+        self._a = filter_time_constant / (filter_time_constant + self.dt)
+
     def supervisory_control(self, measurements_dict):
         """
         Overwrite HybridSupervisoryControllerBaseline.supervisory_control()
@@ -449,10 +459,17 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
         solar_power = measurements_dict["solar_farm"]["power"] if self._has_solar_controller else 0
         battery_power = measurements_dict["battery"]["power"] if self._has_battery_controller else 0
 
+        self._wind_power_filtered = self._a * self._wind_power_filtered + self._b * wind_power
+        self._solar_power_filtered = self._a * self._solar_power_filtered + self._b * solar_power
+        self._battery_power_filtered = (
+            self._a * self._battery_power_filtered + self._b * battery_power
+        )
+
         # Initialize references
         wind_reference = 0.0
         solar_reference = 0.0
-        battery_reference = 0.0
+        battery_charge_limit = 0.0
+        battery_discharge_limit = 0.0
 
         # Set references for each component based on price thresholds, curtailment order
         unconstrained_power = 0.0
@@ -462,42 +479,75 @@ class HybridSupervisoryControllerPriceBased(HybridSupervisoryControllerBase):
                 if measurements_dict["RT_LMP"] < self.wind_price_threshold:
                     wind_reference = 0
                 elif (
-                    unconstrained_power + wind_power
+                    unconstrained_power + self._wind_power_filtered
                     <= self.plant_parameters["interconnect_limit"]
                 ):
                     wind_reference = POWER_SETPOINT_DEFAULT
-                    unconstrained_power += wind_power
+                    unconstrained_power += self._wind_power_filtered
                 else:
                     wind_reference = (
                         self.plant_parameters["interconnect_limit"] - unconstrained_power
                     )
-                    unconstrained_power += wind_power
+                    unconstrained_power += self._wind_power_filtered
             elif component == "solar":
                 if measurements_dict["RT_LMP"] < self.solar_price_threshold:
                     solar_reference = 0
                 elif (
-                    unconstrained_power + solar_power
+                    unconstrained_power + self._solar_power_filtered
                     <= self.plant_parameters["interconnect_limit"]
                 ):
                     solar_reference = POWER_SETPOINT_DEFAULT
-                    unconstrained_power += solar_power
+                    unconstrained_power += self._solar_power_filtered
                 else:
                     solar_reference = (
                         self.plant_parameters["interconnect_limit"] - unconstrained_power
                     )
-                    unconstrained_power += solar_power
+                    unconstrained_power += self._solar_power_filtered
             elif component == "battery":
                 if (
-                    unconstrained_power + battery_power
+                    unconstrained_power + self._battery_power_filtered
                     <= self.plant_parameters["interconnect_limit"]
                 ):
                     # Upper bound for battery
-                    battery_reference = self.plant_parameters["battery"]["discharge_rate"]
-                    unconstrained_power += battery_power
+                    battery_discharge_limit = self.plant_parameters["battery"]["discharge_rate"]
+                    unconstrained_power += self._battery_power_filtered
                 else:
-                    battery_reference = (
+                    battery_discharge_limit = (
                         self.plant_parameters["interconnect_limit"] - unconstrained_power
                     )
-                    unconstrained_power += battery_power
+                    unconstrained_power += self._battery_power_filtered
 
-        return wind_reference, solar_reference, battery_reference
+                if self.plant_parameters["battery"]["allow_grid_power_consumption"]:
+                    battery_charge_limit = -self.plant_parameters["interconnect_limit"]
+                else:
+                    # TODO: could consider using unfiltered version here.
+                    battery_charge_limit = -(self._solar_power_filtered + self._wind_power_filtered)
+
+        return wind_reference, solar_reference, battery_discharge_limit, battery_charge_limit
+
+    def compute_controls(self, measurements_dict):
+        # Run supervisory control logic
+        wind_reference, solar_reference, battery_d, battery_c = self.supervisory_control(
+            measurements_dict
+        )
+
+        # Package the controls for the individual controllers, step, and return
+        controls_dict = {}
+        if self._has_wind_controller:
+            measurements_dict["wind_farm"]["power_reference"] = wind_reference
+            wind_controls_dict = self.wind_controller.compute_controls(measurements_dict)
+            controls_dict["wind_power_setpoints"] = wind_controls_dict["power_setpoints"]
+        if self._has_solar_controller:
+            measurements_dict["solar_farm"]["power_reference"] = solar_reference
+            solar_controls_dict = self.solar_controller.compute_controls(measurements_dict)
+            controls_dict["solar_power_setpoint"] = solar_controls_dict["power_setpoint"]
+        if self._has_battery_controller:
+            battery_controls_dict = self.battery_controller.compute_controls(measurements_dict)
+
+            # Clip to limits
+            battery_power_setpoint = np.minimum(battery_controls_dict["power_setpoint"], battery_d)
+            battery_power_setpoint = np.maximum(battery_power_setpoint, battery_c)
+
+            controls_dict["battery_power_setpoint"] = battery_power_setpoint
+
+        return controls_dict

@@ -1,11 +1,13 @@
 # Requires Hercules v2
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from hercules.grid.grid_utilities import (
     generate_locational_marginal_price_dataframe_from_gridstatus,
 )
 from hercules.hercules_model import HerculesModel
 from hercules.utilities_examples import prepare_output_directory
+from plot_outputs import plot_outputs
 from whoc.controllers import (
     BatteryPriceSOCController,
     HybridSupervisoryControllerPriceBased,
@@ -14,6 +16,7 @@ from whoc.controllers import (
 )
 from whoc.interfaces import HerculesV2Interface
 
+plot_outputs_after_simulation = True
 prepare_output_directory()
 
 # Load and alter the input LMP data to match the time window for simulation
@@ -63,3 +66,8 @@ hmodel.assign_controller(controller)
 hmodel.run()
 
 hmodel.logger.info("Process completed successfully")
+
+if plot_outputs_after_simulation:
+    print("Plotting outputs...")
+    plot_outputs()
+    plt.show()

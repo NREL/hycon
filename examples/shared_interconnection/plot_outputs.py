@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 from hercules import HerculesOutput
 
+
 # Read the Hercules output file using HerculesOutput
 def plot_outputs():
     ho = HerculesOutput("outputs/hercules_output.h5")

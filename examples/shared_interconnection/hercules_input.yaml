@@ -69,7 +69,7 @@ controller:
   solar_price_threshold: 0.0
   high_soc: 0.8
   low_soc: 0.2
-  filter_time_constant: 30.0
+  filter_time_constant: 2.0
 
 external_data:
   external_data_file: lmp_data.csv

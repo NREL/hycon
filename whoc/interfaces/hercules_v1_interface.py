@@ -106,7 +106,10 @@ class HerculesHybridADInterface(InterfaceBase):
                 self.battery_name = [ps for ps in py_sims if "battery" in ps][0]
                 self._has_battery_component = True
                 self.plant_parameters["battery"] = {
-                    "charge_rate":hercules_dict["py_sims"][self.battery_name]["charge_rate"]*1000
+                    "charge_rate": hercules_dict["py_sims"][self.battery_name]\
+                        ["charge_rate"]*1000,
+                    "discharge_rate": hercules_dict["py_sims"][self.battery_name]\
+                        ["discharge_rate"]*1000,
                  } # Convert to kW
             if tech_keys[3] in i.split("_"):
                 self.hydrogen_name = [ps for ps in py_sims if "hydrogen" in ps][0]
@@ -241,5 +244,61 @@ class HerculesHybridADInterface(InterfaceBase):
             {"battery_signal": -battery_power_setpoint,
              "solar_setpoint_mw": solar_power_setpoint / 1000} # Convert to MW
         )
+
+        return hercules_dict
+
+class HerculesBatteryInterface(InterfaceBase):
+    def __init__(self, hercules_dict):
+        super().__init__()
+
+        self.dt = hercules_dict["dt"]
+
+        # Grab name of battery (assumes there is only one! Takes the first)
+        batteries_in_simulation = [k for k in hercules_dict["py_sims"] if "battery" in k]
+        if len(batteries_in_simulation) == 0:
+            raise ValueError("No battery found in simulation.")
+        elif len(batteries_in_simulation) > 1:
+            raise ValueError("Multiple batteries found in simulation. Only one is allowed.")
+        else:
+            self.battery_name = batteries_in_simulation[0]
+
+        self.plant_parameters = {
+            "battery": {
+                "charge_rate": hercules_dict["py_sims"][self.battery_name]\
+                    ["charge_rate"]*1000,
+                "discharge_rate": hercules_dict["py_sims"][self.battery_name]\
+                    ["discharge_rate"]*1000,
+            }
+        }
+
+    def get_measurements(self, hercules_dict):
+        # Extract externally-provided power signal
+        if ("external_signals" in hercules_dict
+            and "plant_power_reference" in hercules_dict["external_signals"]):
+            plant_power_reference = hercules_dict["external_signals"]["plant_power_reference"]
+        else:
+            plant_power_reference = 0
+
+        measurements = {
+            "time": hercules_dict["time"],
+            "battery": {
+                "power_reference": plant_power_reference,
+                "power": -hercules_dict["py_sims"][self.battery_name]["outputs"]["power"],
+                "state_of_charge": hercules_dict["py_sims"][self.battery_name]["outputs"]["soc"],
+            },
+        }
+
+        return measurements
+
+    def check_controls(self, controls_dict):
+        available_controls = ["power_setpoint"]
+
+        for k in controls_dict.keys():
+            if k not in available_controls:
+                raise ValueError("Setpoint " + k + " is not available in this configuration.")
+
+    def send_controls(self, hercules_dict, power_setpoint=0):
+
+        hercules_dict["py_sims"]["inputs"].update({"battery_signal": -power_setpoint})
 
         return hercules_dict

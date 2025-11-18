@@ -38,12 +38,6 @@ class BatteryController(ControllerBase):
                 )
         controller_parameters = {**controller_parameters, **input_dict["controller"]}
         self.set_controller_parameters(**controller_parameters)
-        
-        # Assumes one battery!
-        # TODO: This looks like it needs updating?
-        battery_name = [k for k in input_dict["py_sims"] if "battery" in k][0]
-        self.rated_power_charging = input_dict["py_sims"][battery_name]["charge_rate"] * 1e3
-        self.rated_power_discharging = input_dict["py_sims"][battery_name]["discharge_rate"] * 1e3
 
         # Initialize controller internal state
         self.x = 0
@@ -105,8 +99,8 @@ class BatteryController(ControllerBase):
             right=0
         )
 
-        r_charge = clip_fraction * self.rated_power_charging
-        r_discharge = clip_fraction * self.rated_power_discharging
+        r_charge = clip_fraction * self.plant_parameters["battery"]["charge_rate"]
+        r_discharge = clip_fraction * self.plant_parameters["battery"]["discharge_rate"]
 
         return np.clip(reference_power, -r_discharge, r_charge)
 

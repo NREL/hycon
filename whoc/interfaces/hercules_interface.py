@@ -195,3 +195,6 @@ class HerculesInterface(InterfaceBase):
             h_dict["battery"]["power_setpoint"] = battery_power_setpoint
 
         return h_dict
+
+# Alias for compatibility
+HerculesV2Interface = HerculesInterface

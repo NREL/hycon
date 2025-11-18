@@ -1,4 +1,7 @@
-from whoc.interfaces.hercules_interface import HerculesInterface
+from whoc.interfaces.hercules_interface import (
+    HerculesInterface,
+    HerculesV2Interface,
+)
 from whoc.interfaces.hercules_v1_interface import (
     HerculesADInterface,
     HerculesBatteryInterface,

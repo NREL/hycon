@@ -129,22 +129,8 @@ significant as the simulation progresses.
 
 (examples_windhydrogen)=
 ## wind_hydrogen_tracking
-Example of an off-grid wind-to-hydrogen hybrid energy system using the 
-{ref}`controllers_hydrogen` to
-track a hydrogen production rate reference. The plant comprises 9 NREL 5MW reference wind turbines
-(45 MW total wind capacity) and a hydrogen plant composed of 40 1-MW electrolyzer stacks.
-
-To run this example, navigate to the examples/wind_hydrogen_tracking folder and execute the shell
-script run_script.sh:
-```
-bash run_script.sh
-```
-
-This will run a short (10 minute) simulation of the plant and controller tracking a hydrogen
-production reference. The resulting trajectories are plotted, producing:
-![Results of wind_farm_power_tracking_florisstandin example](
-    graphics/wind-hydrogen-example-plot.png
-)
+Example of wind and hydrogen using WHOC for control is now available in the
+Hercules repository.
 
 (examples_flexibleinterconnect)=
 ## single_turbine_flexible_interconnect

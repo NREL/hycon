@@ -7,7 +7,7 @@ from whoc.controllers import (
     SolarPassthroughController,
     WindFarmPowerTrackingController,
 )
-from whoc.interfaces import HerculesV2Interface
+from whoc.interfaces import HerculesInterface
 
 prepare_output_directory()
 
@@ -27,7 +27,7 @@ if not include_battery:
 hmodel = HerculesModel(h_dict)
 
 # Establish controllers based on options
-interface = HerculesV2Interface(hmodel.h_dict)
+interface = HerculesInterface(hmodel.h_dict)
 print("Setting up controller.")
 wind_controller = WindFarmPowerTrackingController(interface, hmodel.h_dict)
 solar_controller = (

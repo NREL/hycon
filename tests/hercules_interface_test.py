@@ -1,5 +1,5 @@
 import pytest
-from whoc.interfaces import HerculesV2Interface
+from whoc.interfaces import HerculesInterface
 
 test_hercules_dict = {
     "dt": 1,
@@ -50,11 +50,11 @@ def test_interface_instantiation():
     each implement the required methods specified by InterfaceBase.
     """
 
-    _ = HerculesV2Interface(h_dict=test_hercules_dict)
+    _ = HerculesInterface(h_dict=test_hercules_dict)
 
-def test_HerculesV2Interface_windonly():
+def test_HerculesInterface_windonly():
     # Test instantiation
-    interface = HerculesV2Interface(h_dict=test_hercules_dict)
+    interface = HerculesInterface(h_dict=test_hercules_dict)
     assert interface.dt == test_hercules_dict["dt"]
     assert interface.plant_parameters["wind_farm"]["capacity"] == (
         test_hercules_dict["wind_farm"]["capacity"]
@@ -104,9 +104,9 @@ def test_HerculesV2Interface_windonly():
     with pytest.raises(TypeError):  # Bad kwarg
         interface.send_controls(test_hercules_dict, **bad_controls_dict1)
 
-def test_HerculesV2Interface_hybrid():
+def test_HerculesInterface_hybrid():
     # Test instantiation
-    interface = HerculesV2Interface(h_dict=test_hercules_dict)
+    interface = HerculesInterface(h_dict=test_hercules_dict)
     assert interface.dt == test_hercules_dict["dt"]
     assert interface.plant_parameters["wind_farm"]["capacity"] == (
         test_hercules_dict["wind_farm"]["capacity"]

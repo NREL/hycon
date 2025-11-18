@@ -2,7 +2,7 @@ from whoc.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_
 from whoc.interfaces.interface_base import InterfaceBase
 
 
-class HerculesADInterface(InterfaceBase):
+class HerculesV1ADInterface(InterfaceBase):
     def __init__(self, hercules_dict):
         super().__init__()
 
@@ -22,10 +22,6 @@ class HerculesADInterface(InterfaceBase):
         wind_directions = hercules_dict["hercules_comms"]["amr_wind"][self.wf_name][
             "turbine_wind_directions"
         ]
-        # wind_speeds = input_dict["hercules_comms"]\
-        #                         ["amr_wind"]\
-        #                         [self.wf_name]\
-        #                         ["turbine_wind_speeds"]
         turbine_powers = hercules_dict["hercules_comms"]["amr_wind"][self.wf_name]["turbine_powers"]
         time = hercules_dict["time"]
 
@@ -50,7 +46,6 @@ class HerculesADInterface(InterfaceBase):
             "forecast": forecast,
             "wind_farm": {
                 "wind_directions": wind_directions,
-                # "wind_speeds":wind_speeds,
                 "turbine_powers": turbine_powers,
                 "power_reference": wind_power_reference,
             },
@@ -83,7 +78,7 @@ class HerculesADInterface(InterfaceBase):
         return hercules_dict
 
 
-class HerculesHybridADInterface(InterfaceBase):
+class HerculesV1HybridADInterface(InterfaceBase):
     def __init__(self, hercules_dict):
         super().__init__()
 
@@ -178,9 +173,6 @@ class HerculesHybridADInterface(InterfaceBase):
             }
             total_power += sum(turbine_powers)
         if self._has_solar_component:
-            # solar_power converted to kW here
-            # solar_dni is the direct normal irradiance
-            # solar_aoi is the 
             measurements["solar_farm"] = {
                 "power": hercules_dict["py_sims"][self.solar_name]["outputs"]["power_mw"] * 1000,
                 "direct_normal_irradiance": hercules_dict["py_sims"][self.solar_name]["outputs"]\
@@ -247,7 +239,7 @@ class HerculesHybridADInterface(InterfaceBase):
 
         return hercules_dict
 
-class HerculesBatteryInterface(InterfaceBase):
+class HerculesV1BatteryInterface(InterfaceBase):
     def __init__(self, hercules_dict):
         super().__init__()
 
@@ -302,3 +294,8 @@ class HerculesBatteryInterface(InterfaceBase):
         hercules_dict["py_sims"]["inputs"].update({"battery_signal": -power_setpoint})
 
         return hercules_dict
+
+# Aliases for backward compatibility
+HerculesBatteryInterface = HerculesV1BatteryInterface
+HerculesADInterface = HerculesV1ADInterface
+HerculesHybridADInterface = HerculesV1HybridADInterface

@@ -7,7 +7,7 @@ from hercules.grid.grid_utilities import (
 from hercules.hercules_model import HerculesModel
 from hercules.utilities_examples import prepare_output_directory
 from whoc.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
-from whoc.interfaces import HerculesV2Interface
+from whoc.interfaces import HerculesInterface
 
 prepare_output_directory()
 
@@ -22,12 +22,12 @@ df_lmp.to_csv("lmp_data.csv", index=False)
 hmodel = HerculesModel("inputs/hercules_input.yaml")
 
 # Establish the interface and controller, assign to the Hercules model
-interface=HerculesV2Interface(hmodel.h_dict)
+interface=HerculesInterface(hmodel.h_dict)
 controller = HybridSupervisoryControllerMultiRef(
     battery_controller=BatteryPriceSOCController(
         interface=interface, input_dict=hmodel.h_dict
     ),
-    interface=HerculesV2Interface(hmodel.h_dict),
+    interface=HerculesInterface(hmodel.h_dict),
     input_dict=hmodel.h_dict,
 )
 hmodel.assign_controller(controller)

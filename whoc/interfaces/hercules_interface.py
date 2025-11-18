@@ -4,7 +4,7 @@ from whoc.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_
 from whoc.interfaces.interface_base import InterfaceBase
 
 
-class HerculesV2Interface(InterfaceBase):
+class HerculesInterface(InterfaceBase):
     """
     Class for interfacing with Hercules v2 simulator.
     """

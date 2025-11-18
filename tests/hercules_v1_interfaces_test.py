@@ -1,8 +1,8 @@
 import pytest
 from whoc.interfaces import (
-    HerculesADInterface,
-    HerculesBatteryInterface,
-    HerculesHybridADInterface,
+    HerculesV1ADInterface,
+    HerculesV1BatteryInterface,
+    HerculesV1HybridADInterface,
 )
 
 test_hercules_dict = {
@@ -45,13 +45,13 @@ def test_interface_instantiation():
     each implement the required methods specified by InterfaceBase.
     """
 
-    _ = HerculesADInterface(hercules_dict=test_hercules_dict)
-    _ = HerculesHybridADInterface(hercules_dict=test_hercules_dict)
-    _ = HerculesBatteryInterface(hercules_dict=test_hercules_dict)
+    _ = HerculesV1ADInterface(hercules_dict=test_hercules_dict)
+    _ = HerculesV1HybridADInterface(hercules_dict=test_hercules_dict)
+    _ = HerculesV1BatteryInterface(hercules_dict=test_hercules_dict)
 
 
 def test_HerculesADInterface():
-    interface = HerculesADInterface(hercules_dict=test_hercules_dict)
+    interface = HerculesV1ADInterface(hercules_dict=test_hercules_dict)
 
     # Test get_measurements()
     measurements = interface.get_measurements(hercules_dict=test_hercules_dict)
@@ -121,7 +121,7 @@ def test_HerculesADInterface():
     test_hercules_dict["external_signals"]["plant_power_reference"] = 1000.0
 
 def test_HerculesHybridADInterface():
-    interface = HerculesHybridADInterface(hercules_dict=test_hercules_dict)
+    interface = HerculesV1HybridADInterface(hercules_dict=test_hercules_dict)
 
     # Test get_measurements()
     measurements = interface.get_measurements(hercules_dict=test_hercules_dict)
@@ -209,17 +209,17 @@ def test_HerculesHybridADInterface():
 
 def test_HerculesBatteryInterface():
 
-    interface = HerculesBatteryInterface(hercules_dict=test_hercules_dict)
+    interface = HerculesV1BatteryInterface(hercules_dict=test_hercules_dict)
 
     # Check instantiation with no battery raises and error
     temp = test_hercules_dict["py_sims"].pop("test_battery")
     with pytest.raises(ValueError):
-        _ = HerculesBatteryInterface(hercules_dict=test_hercules_dict)
+        _ = HerculesV1BatteryInterface(hercules_dict=test_hercules_dict)
     # Reinstate and add second battery; test that 2 batteries causes error
     test_hercules_dict["py_sims"]["test_battery"] = temp
     test_hercules_dict["py_sims"]["test_battery_2"] = temp
     with pytest.raises(ValueError):
-        _ = HerculesBatteryInterface(hercules_dict=test_hercules_dict)
+        _ = HerculesV1BatteryInterface(hercules_dict=test_hercules_dict)
     test_hercules_dict["py_sims"].pop("test_battery_2")
 
     # Test get_measurements()

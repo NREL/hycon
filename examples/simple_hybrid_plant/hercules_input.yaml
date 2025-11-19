@@ -59,4 +59,5 @@ battery:
     - power
     - soc
 
-external_data_file: plant_power_reference.csv
+external_data:
+  external_data_file: plant_power_reference.csv

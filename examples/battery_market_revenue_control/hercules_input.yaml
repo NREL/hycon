@@ -1,7 +1,7 @@
 # Input YAML for hercules
 
 # Name
-name: example_03
+name: battery_market_revenue_control
 
 ###
 # Describe this emulator setup
@@ -32,4 +32,5 @@ battery:
     - soc
     - power_setpoint
 
-external_data_file: lmp_data.csv
+external_data:
+  external_data_file: lmp_data.csv

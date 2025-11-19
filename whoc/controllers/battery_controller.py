@@ -38,11 +38,6 @@ class BatteryController(ControllerBase):
                 )
         controller_parameters = {**controller_parameters, **input_dict["controller"]}
         self.set_controller_parameters(**controller_parameters)
-        
-        # Assumes one battery!
-        battery_name = [k for k in input_dict["py_sims"] if "battery" in k][0]
-        self.rated_power_charging = input_dict["py_sims"][battery_name]["charge_rate"] * 1e3
-        self.rated_power_discharging = input_dict["py_sims"][battery_name]["discharge_rate"] * 1e3
 
         # Initialize controller internal state
         self.x = 0
@@ -104,8 +99,8 @@ class BatteryController(ControllerBase):
             right=0
         )
 
-        r_charge = clip_fraction * self.rated_power_charging
-        r_discharge = clip_fraction * self.rated_power_discharging
+        r_charge = clip_fraction * self.plant_parameters["battery"]["charge_rate"]
+        r_discharge = clip_fraction * self.plant_parameters["battery"]["discharge_rate"]
 
         return np.clip(reference_power, -r_discharge, r_charge)
 
@@ -113,9 +108,9 @@ class BatteryController(ControllerBase):
         """
         Main compute_controls method for BatteryController.
         """
-        reference_power = measurements_dict["power_reference"]
-        current_power = measurements_dict["battery_power"]
-        soc = measurements_dict["battery_soc"]
+        reference_power = measurements_dict["battery"]["power_reference"]
+        current_power = measurements_dict["battery"]["power"]
+        soc = measurements_dict["battery"]["state_of_charge"]
 
         # Apply reference clipping
         reference_power = self.soc_clipping(soc, reference_power)
@@ -146,4 +141,80 @@ class BatteryPassthroughController(ControllerBase):
         """"
         Main compute_controls method for BatteryPassthroughController.
         """
-        return {"power_setpoint": measurements_dict["power_reference"]}
+        return {"power_setpoint": measurements_dict["battery"]["power_reference"]}
+
+
+class BatteryPriceSOCController(ControllerBase):
+    """
+    Controller considers price and SOC to determine power setpoint.
+    """
+    def __init__(self, interface, input_dict, controller_parameters={}, verbose=True):
+        super().__init__(interface, verbose)
+
+        # Check that parameters are not specified both in input file
+        # and in controller_parameters
+        if "controller" in input_dict:
+            for cp in controller_parameters.keys():
+                if cp in input_dict["controller"]:
+                    raise KeyError(
+                        "Found key \""+cp+"\" in both input_dict[\"controller\"] and"
+                        " in controller_parameters."
+                    )
+            controller_parameters = {**controller_parameters, **input_dict["controller"]}
+        self.set_controller_parameters(**controller_parameters)
+
+        self.rated_power_charging = input_dict["battery"]["charge_rate"]
+        self.rated_power_discharging = input_dict["battery"]["discharge_rate"]
+
+    def set_controller_parameters(
+        self,
+        high_soc=0.8,
+        low_soc=0.2,
+        **_ # <- Allows arbitrary additional parameters to be passed, which are ignored
+    ):
+        """
+        Set parameters for BatteryPriceSOCController.
+
+        high_soc is the SOC threshold above which the battery will only charge if the price is above
+        the highest (hourly) DA price of the day.
+
+        low_soc is the SOC threshold below which the battery will only discharge if the price is
+        below the lowest (hourly) DA price of the day.
+
+        Args:
+            high_soc (float): High SOC threshold (0 to 1).
+            low_soc (float): Low SOC threshold (0 to 1).
+        """
+        self.high_soc = high_soc
+        self.low_soc = low_soc
+
+    def compute_controls(self, measurements_dict):
+
+        day_ahead_lmps = np.array(measurements_dict["DA_LMP_24hours"])
+        sorted_day_ahead_lmps = np.sort(day_ahead_lmps)
+        real_time_lmp = measurements_dict["RT_LMP"]
+
+        # Extract limits
+        bottom_4 = sorted_day_ahead_lmps[3]
+        top_4 = sorted_day_ahead_lmps[-4]
+        bottom_1 = sorted_day_ahead_lmps[0]
+        top_1 = sorted_day_ahead_lmps[-1]
+
+        # Access the state of charge and LMP in real-time
+        soc = measurements_dict["battery"]["state_of_charge"]
+
+        # Note that the convention is followed where charging is negative power
+        # This matches what is in place in the hercules/hybrid_plant level and 
+        # will be inverted before passing into the battery modules
+        if real_time_lmp > top_1:
+            power_setpoint = self.rated_power_discharging
+        elif (real_time_lmp > top_4) & (soc < self.high_soc):
+            power_setpoint = self.rated_power_discharging
+        elif real_time_lmp < bottom_1:
+            power_setpoint = -self.rated_power_charging
+        elif (real_time_lmp < bottom_4) & (soc > self.low_soc):
+            power_setpoint = -self.rated_power_charging
+        else:
+            power_setpoint = 0.0
+
+        return {"power_setpoint": power_setpoint}

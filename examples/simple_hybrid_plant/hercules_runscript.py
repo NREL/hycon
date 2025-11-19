@@ -1,52 +1,54 @@
-import sys
-
-from hercules.emulator import Emulator
-from hercules.py_sims import PySims
-from hercules.utilities import load_yaml
+from hercules.hercules_model import HerculesModel
+from hercules.utilities import load_hercules_input
+from hercules.utilities_examples import prepare_output_directory
 from whoc.controllers import (
     BatteryPassthroughController,
     HybridSupervisoryControllerBaseline,
     SolarPassthroughController,
     WindFarmPowerTrackingController,
 )
-from whoc.interfaces.hercules_hybrid_actuator_disk_interface import HerculesHybridADInterface
+from whoc.interfaces import HerculesInterface
+
+prepare_output_directory()
+
+h_dict = load_hercules_input("inputs/hercules_input.yaml")
 
 # User options
 include_solar = True
 include_battery = True
 
 # Load all inputs, remove solar and/or battery as desired
-input_dict = load_yaml(sys.argv[1])
 if not include_solar:
-    del input_dict["py_sims"]["solar_farm_0"]
+    del h_dict["solar_farm"]
 if not include_battery:
-    del input_dict["py_sims"]["battery_0"]
+    del h_dict["battery"]
 
-print("Establishing simulators.")
-py_sims = PySims(input_dict)
+# Establish the Hercules model without a controller
+hmodel = HerculesModel(h_dict)
 
 # Establish controllers based on options
-interface = HerculesHybridADInterface(input_dict)
+interface = HerculesInterface(hmodel.h_dict)
 print("Setting up controller.")
-wind_controller = WindFarmPowerTrackingController(interface, input_dict)
+wind_controller = WindFarmPowerTrackingController(interface, hmodel.h_dict)
 solar_controller = (
-    SolarPassthroughController(interface, input_dict) if include_solar
+    SolarPassthroughController(interface, hmodel.h_dict) if include_solar
     else None
 )
 battery_controller = (
-    BatteryPassthroughController(interface, input_dict) if include_battery
+    BatteryPassthroughController(interface, hmodel.h_dict) if include_battery
     else None
 )
 controller = HybridSupervisoryControllerBaseline(
     interface,
-    input_dict,
+    hmodel.h_dict,
     wind_controller=wind_controller,
     solar_controller=solar_controller,
     battery_controller=battery_controller
 )
 
-emulator = Emulator(controller, py_sims, input_dict)
-emulator.run_helics_setup()
-emulator.enter_execution(function_targets=[], function_arguments=[[]])
+hmodel.assign_controller(controller)
 
-print("Finished running open-loop controller.")
+# Run the simulation
+hmodel.run()
+
+hmodel.logger.info("Process completed successfully")

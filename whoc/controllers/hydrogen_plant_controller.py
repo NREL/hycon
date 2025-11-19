@@ -83,21 +83,31 @@ class HydrogenPlantController(ControllerBase):
             # of possible lower-level controllers
             generator_measurements_dict = copy.deepcopy(measurements_dict)
             generator_measurements_dict["power_reference"] = power_reference
+            # Remove any external power reference
+            if "plant_power_reference" in generator_measurements_dict:
+                del generator_measurements_dict["plant_power_reference"]
+
+            # Compute controls for generator
             generator_controls_dict = self.generator_controller.compute_controls(
                 generator_measurements_dict
             )
+
+            # Clean up returned controls
             if "yaw_angles" in generator_controls_dict:
                 del generator_controls_dict["yaw_angles"]
+            if "power_setpoints" in generator_controls_dict:
+                generator_controls_dict["wind_power_setpoints"] = (
+                    generator_controls_dict["power_setpoints"]
+                )
+                del generator_controls_dict["power_setpoints"]
 
         return generator_controls_dict
 
     def supervisory_control(self, measurements_dict):
         # Extract measurements sent
-        time = measurements_dict["time"] # noqa: F841 
         current_power = measurements_dict["total_power"]
-        hydrogen_output = measurements_dict["hydrogen_production_rate"]
-        wind_speed = measurements_dict["wind_speed"] # noqa: F841
-        hydrogen_reference = measurements_dict["hydrogen_reference"]
+        hydrogen_output = measurements_dict["hydrogen"]["production_rate"]
+        hydrogen_reference = measurements_dict["hydrogen"]["power_reference"]
 
         # Input filtering
         a = 0.05

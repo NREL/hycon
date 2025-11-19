@@ -14,9 +14,11 @@ examples/*/logstandin*
 examples/*/loghercules*
 examples/*/logfloris*
 *.pkl
+*.h5
 
 # Exceptions
 !examples/*/inputs/*.csv
+examples/lookup-based_wake_steering_florisstandin/inputs/amr_standin_data.csv
 
 # macOS files
 .DS_Store

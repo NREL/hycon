@@ -33,8 +33,8 @@ class LookupBasedWakeSteeringController(ControllerBase):
         """
         super().__init__(interface, verbose=verbose)
 
-        self.dt = input_dict["dt"]  # Won't be needed here, but generally good to have
-        self.n_turbines = input_dict["controller"]["num_turbines"]
+        # Pull plant parameters for ease of use
+        self.n_turbines = self.plant_parameters["n_turbines"]
         self.turbines = range(self.n_turbines)
 
         # Handle yaw optimizer object
@@ -78,7 +78,7 @@ class LookupBasedWakeSteeringController(ControllerBase):
 
 
     def compute_controls(self, measurements_dict):
-        return self.wake_steering_angles(measurements_dict["wind_directions"])
+        return self.wake_steering_angles(measurements_dict["wind_farm"]["wind_directions"])
 
     def wake_steering_angles(self, wind_directions):
 

@@ -35,7 +35,8 @@ def plot_outputs():
         linewidth=0.5,
     )
 
-    # Process and plot the day ahead top and bottom 4 and 1 for each midnight to midnight (UTC) period
+    # Process and plot the day ahead top and bottom 4 and 1
+    # for each midnight to midnight (UTC) period
     df_reduced = df[["time_utc", "external_signals.lmp_da"]].copy()
 
     # Create an hourly version for the DA LMP (drop all periods that aren't on an hour)

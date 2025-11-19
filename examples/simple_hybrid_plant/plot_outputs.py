@@ -91,7 +91,13 @@ def plot_outputs():
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7,5))
     ax[0].plot(time, wind_power/1e3, color=wind_col)
     for i in range (n_wind_turbines):
-        ax[1].plot(time, wind_power_individuals[:,i]/1e3, label="WT"+str(i), alpha=0.7, color=wind_col)
+        ax[1].plot(
+            time,
+            wind_power_individuals[:,i]/1e3,
+            label="WT"+str(i),
+            alpha=0.7,
+            color=wind_col
+        )
     ax[0].set_ylabel("Total wind power [MW]")
     ax[1].set_ylabel("Individual turbine power [MW]")
     ax[0].grid()

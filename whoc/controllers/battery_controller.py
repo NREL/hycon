@@ -30,13 +30,14 @@ class BatteryController(ControllerBase):
 
         # Check that parameters are not specified both in input file
         # and in controller_parameters
-        for cp in controller_parameters.keys():
-            if cp in input_dict["controller"]:
-                raise KeyError(
-                    "Found key \""+cp+"\" in both input_dict[\"controller\"] and"
-                    " in controller_parameters."
-                )
-        controller_parameters = {**controller_parameters, **input_dict["controller"]}
+        if "controller" in input_dict:
+            for cp in controller_parameters.keys():
+                if cp in input_dict["controller"]:
+                    raise KeyError(
+                        "Found key \""+cp+"\" in both input_dict[\"controller\"] and"
+                        " in controller_parameters."
+                    )
+            controller_parameters = {**controller_parameters, **input_dict["controller"]}
         self.set_controller_parameters(**controller_parameters)
 
         # Initialize controller internal state

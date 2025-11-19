@@ -54,6 +54,10 @@ class HerculesInterface(InterfaceBase):
                 "energy_capacity": h_dict["battery"]["energy_capacity"],
                 "charge_rate": h_dict["battery"]["charge_rate"],
                 "discharge_rate": h_dict["battery"]["discharge_rate"],
+                "allow_grid_power_consumption": h_dict["battery"].get(
+                    "allow_grid_power_consumption",
+                    False
+                )
             }
 
         # Electrolyzer parameters (placeholder for future electrolyzer parameters)

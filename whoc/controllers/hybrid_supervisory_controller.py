@@ -272,7 +272,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
         # Extract measurements sent
         if self._has_wind_controller:
             wind_power = np.array(measurements_dict["wind_farm"]["turbine_powers"]).sum()
-            wind_reference = measurements_dict["wind_farm"]["power_reference"]
+            wind_reference = measurements_dict["wind_farm"].get(
+                "power_reference", self.plant_parameters["wind_farm"]["capacity"]
+            )
             wind_reference = np.minimum(
                 wind_reference,
                 self.plant_parameters["wind_farm"]["capacity"]
@@ -283,7 +285,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
 
         if self._has_solar_controller:
             solar_power = measurements_dict["solar_farm"]["power"]
-            solar_reference = measurements_dict["solar_farm"]["power_reference"]
+            solar_reference = measurements_dict["solar_farm"].get(
+                "power_reference", self.plant_parameters["solar_farm"]["capacity"]
+            )
             solar_reference = np.minimum(
                 solar_reference, self.plant_parameters["solar_farm"]["capacity"]
             )
@@ -294,7 +298,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
         if self._has_battery_controller:
             battery_power = measurements_dict["battery"]["power"]
             if "power_reference" in measurements_dict["battery"]:
-                battery_reference = measurements_dict["battery"]["power_reference"]
+                battery_reference = measurements_dict["battery"].get(
+                    "power_reference", 0
+                )
             else:
                 battery_reference = 0
             battery_reference = np.minimum(

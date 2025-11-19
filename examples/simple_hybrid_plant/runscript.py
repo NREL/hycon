@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
-
 from hercules.hercules_model import HerculesModel
 from hercules.utilities import load_hercules_input
 from hercules.utilities_examples import prepare_output_directory
+from plot_outputs import plot_outputs
 from whoc.controllers import (
     BatteryPassthroughController,
     HybridSupervisoryControllerBaseline,
@@ -10,8 +10,6 @@ from whoc.controllers import (
     WindFarmPowerTrackingController,
 )
 from whoc.interfaces import HerculesInterface
-
-from plot_outputs import plot_outputs
 
 generate_output_plots = True
 

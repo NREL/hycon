@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from hercules import HerculesOutput
 
+
 def plot_outputs():
     dfs = [
         HerculesOutput("outputs/hercules_output_ol.h5").df,

@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
-import pandas as pd
+from hercules import HerculesOutput
 
 def plot_outputs():
-    dfs = [pd.read_csv("outputs/hercules_output_ol.csv"), pd.read_csv("outputs/hercules_output_cl.csv")]
+    dfs = [
+        HerculesOutput("outputs/hercules_output_ol.h5").df,
+        HerculesOutput("outputs/hercules_output_cl.h5").df,
+    ]
+
     labels = ["Open-loop control", "Closed-loop control"]
 
     n_turbines = 2
-    wf_str = "hercules_comms.amr_wind.wind_farm_0."
-    pow_cols = [wf_str+"turbine_powers.{0:03d}".format(t) for t in range(n_turbines)]
-    wd_cols = [wf_str+"turbine_wind_directions.{0:03d}".format(t) for t in range(n_turbines)]
-    yaw_cols = [wf_str+"turbine_yaw_angles.{0:03d}".format(t) for t in range(n_turbines)]
+    pow_cols = ["wind_farm.turbine_powers.{0:03d}".format(t) for t in range(n_turbines)]
     ref_col = "external_signals.wind_power_reference"
 
     # Create plots
@@ -20,14 +21,12 @@ def plot_outputs():
         # Extract data from larger array
         time = df['time'].to_numpy()
         powers = df[pow_cols].to_numpy()
-        wds = df[wd_cols].to_numpy()
-        yaws = df[yaw_cols].to_numpy()
         ref = df[ref_col].to_numpy()
 
         # Direction
         for t in range(n_turbines):
             if t == 0:
-                line = ax[case].fill_between(time, powers[:,t], label="T{0:03d} power".format(t))
+                ax[case].fill_between(time, powers[:,t], label="T{0:03d} power".format(t))
             else:
                 ax[case].fill_between(time, powers[:,:t+1].sum(axis=1), powers[:,:t].sum(axis=1),
                     label="T{0:03d} power".format(t))

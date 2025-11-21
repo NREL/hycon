@@ -51,3 +51,7 @@ hmodel.assign_controller(controller)
 
 hmodel.run()
 print("Finished running closed-loop controller.")
+
+if generate_output_plots:
+    plot_outputs()
+    plt.show()

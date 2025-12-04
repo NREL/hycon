@@ -27,10 +27,10 @@ wind_farm:
 
 battery:
   component_type: BatterySimple
-  size: 20000  # kW size of the battery 
-  energy_capacity: 80000 # total capacity of the battery in kWh (4-hour 20 MW battery)
-  charge_rate: 20000 # charge rate of the battery in kW
-  discharge_rate: 20000 # discharge rate of the battery in kW
+  size: 500  # kW size of the battery 
+  energy_capacity: 2000 # total capacity of the battery in kWh (4-hour 500 kW battery)
+  charge_rate: 500 # charge rate of the battery in kW
+  discharge_rate: 500 # discharge rate of the battery in kW
   max_SOC: 0.9 # upper boundary on battery SOC
   min_SOC: 0.1 # lower boundary on battery SOC
   allow_grid_power_consumption: True
@@ -43,4 +43,4 @@ battery:
 external_data:
   external_data_file: flexible_interconnect_limit.csv
   log_channels:
-    - wind_power_reference
+    - plant_power_reference

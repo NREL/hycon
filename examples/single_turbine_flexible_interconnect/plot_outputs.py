@@ -18,8 +18,10 @@ def plot_outputs():
     df_batt = HerculesOutput("outputs/hercules_output_with_battery.h5").df
     df_base = HerculesOutput("outputs/hercules_output_baseline.h5").df
 
+    print(df_batt["battery.power"].head())
+
     pow_col = "wind_farm.turbine_powers.000"
-    ref_col = "external_signals.wind_power_reference"
+    ref_col = "external_signals.plant_power_reference"
     batt_col = "battery.power"
     ws_col = "wind_farm.wind_speeds_withwakes.000"
 
@@ -31,7 +33,7 @@ def plot_outputs():
     time = df_wind['time'].to_numpy()
     powers_wind_only = df_wind[pow_col].to_numpy()
     powers_with_batt = df_batt[pow_col].to_numpy()
-    battery_power = -df_batt[batt_col] # Discharging positive
+    battery_power = df_batt[batt_col] # Discharging positive
     powers_base = df_base[pow_col].to_numpy()
     flexible_interconnect = df_wind[ref_col].to_numpy()
 
@@ -131,6 +133,9 @@ def plot_outputs():
     )
     print("Total time curtailed: {0:.1f} hours".format(curtailed_hrs))
 
+    return fig
+
 if __name__ == "__main__":
-    plot_outputs()
+    fig = plot_outputs()
+    # fig.savefig("../../docs/graphics/flexible-interconnect.png", dpi=300, format="png")
     plt.show()

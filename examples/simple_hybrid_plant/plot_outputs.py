@@ -53,12 +53,10 @@ def plot_outputs():
     ax.legend(loc="lower right")
     ax.set_xlim([0, 120])
 
-    # fig.savefig("../../docs/graphics/simple-hybrid-example-plot.png", dpi=300, format="png")
-
     # Plot the battery power and state of charge, if battery component included
     if not (battery_power == 0).all():
         battery_soc = df["battery.soc"]
-        fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7,5))
+        figb, ax = plt.subplots(2, 1, sharex=True, figsize=(7,5))
         ax[0].plot(time, battery_power/1e3, color=battery_col)
         ax[1].plot(time, battery_soc, color=battery_col)
         ax[0].set_ylabel("Battery power [MW]")
@@ -71,7 +69,7 @@ def plot_outputs():
     if not (solar_power == 0).all():
         angle_of_incidence = df["solar_farm.aoi"]
         direct_normal_irradiance = df["solar_farm.dni"]
-        fig, ax = plt.subplots(3, 1, sharex=True, figsize=(7,5))
+        figs, ax = plt.subplots(3, 1, sharex=True, figsize=(7,5))
         ax[0].plot(time, solar_power/1e3, color="C1")
         ax[0].set_ylabel("Solar power [MW]")
         ax[0].grid()
@@ -88,7 +86,7 @@ def plot_outputs():
     # Plot the wind data
     wind_power_individuals = df[["wind_farm.turbine_powers.{0:03d}".format(t)
                                 for t in range(n_wind_turbines)]].to_numpy()
-    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7,5))
+    figw, ax = plt.subplots(2, 1, sharex=True, figsize=(7,5))
     ax[0].plot(time, wind_power/1e3, color=wind_col)
     for i in range (n_wind_turbines):
         ax[1].plot(
@@ -104,6 +102,9 @@ def plot_outputs():
     ax[1].grid()
     ax[1].set_xlabel("Time [mins]")
 
+    return fig
+
 if __name__ == "__main__":
-    plot_outputs()
+    fig = plot_outputs()
+    # fig.savefig("../../docs/graphics/simple-hybrid-example-plot.png", dpi=300, format="png")
     plt.show()

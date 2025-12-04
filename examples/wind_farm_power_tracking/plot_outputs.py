@@ -42,7 +42,7 @@ def plot_outputs():
     ax[0].legend(loc="lower left")
     ax[1].set_xlabel("Time [s]")
 
-# fig.savefig("../../docs/graphics/wf-power-tracking-plot.png", dpi=300, format="png")
+    return fig
 
 # In this example, the wind turbines are aligned with the oncoming wind, so T000 wakes T001.
 # The farm power setpoint more than available to begin, so both
@@ -54,5 +54,6 @@ def plot_outputs():
 # both controllers meet the setpoint.
 
 if __name__ == "__main__":
-    plot_outputs()
+    fig = plot_outputs()
+    # fig.savefig("../../docs/graphics/wf-power-tracking-plot.png", dpi=300, format="png")
     plt.show()

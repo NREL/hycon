@@ -6,7 +6,9 @@ from hercules.utilities_examples import prepare_output_directory
 from plot_outputs import plot_outputs
 from whoc.controllers import (
     HybridSupervisoryControllerMultiRef,
+    HybridSupervisoryControllerBaseline,
     WindFarmPowerTrackingController,
+    BatteryController,
 )
 from whoc.interfaces import HerculesInterface
 
@@ -18,7 +20,7 @@ prepare_output_directory()
 time_hours = pd.date_range(start="2018-05-10 00:00:00", periods=25, freq="1H", tz="UTC")
 df = pd.DataFrame({
     "time_utc": time_hours,
-    "wind_power_reference": [1374.7, 1366.1, 1366.1, 1376.4, 1376.4, 1390.9, 1390.9, 1401.2, 1401.2,
+    "plant_power_reference": [1374.7, 1366.1, 1366.1, 1376.4, 1376.4, 1390.9, 1390.9, 1401.2, 1401.2,
                              1401.2, 1401.2, 1401.2, 1401.2, 1401.2, 1401.2, 1401.2, 1401.2, 1401.2,
                              1401.2, 1401.2, 1401.2, 1401.2, 1401.2, 1406.9, 1406.9]
 })
@@ -53,7 +55,7 @@ h_dict["output_file"] = "outputs/hercules_output_wind_only.h5"
 
 hmodel = HerculesModel(h_dict)
 interface = HerculesInterface(hmodel.h_dict)
-controller = HybridSupervisoryControllerMultiRef(
+controller = HybridSupervisoryControllerBaseline(
     wind_controller=WindFarmPowerTrackingController(interface, hmodel.h_dict),
     interface=interface,
     input_dict=hmodel.h_dict
@@ -69,8 +71,9 @@ h_dict = load_hercules_input("hercules_input.yaml")
 h_dict["output_file"] = "outputs/hercules_output_with_battery.h5"
 hmodel = HerculesModel(h_dict)
 interface = HerculesInterface(hmodel.h_dict)
-controller = HybridSupervisoryControllerMultiRef(
+controller = HybridSupervisoryControllerBaseline(
     wind_controller=WindFarmPowerTrackingController(interface, hmodel.h_dict),
+    battery_controller=BatteryController(interface, hmodel.h_dict),
     interface=interface,
     input_dict=hmodel.h_dict
 )

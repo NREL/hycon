@@ -3,12 +3,12 @@ import sys
 from hercules.emulator import Emulator
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
-from whoc.controllers import (
+from hycon.controllers import (
     BatteryController,
     HybridSupervisoryControllerBaseline,
     WindFarmPowerTrackingController,
 )
-from whoc.interfaces import HerculesHybridADInterface
+from hycon.interfaces import HerculesHybridADInterface
 
 input_dict = load_yaml(sys.argv[1])
 input_dict["output_file"] = "outputs/hercules_output_with_battery.csv"

@@ -1,6 +1,6 @@
 import pytest
-from whoc.controllers.controller_base import ControllerBase
-from whoc.interfaces.interface_base import InterfaceBase
+from hycon.controllers.controller_base import ControllerBase
+from hycon.interfaces.interface_base import InterfaceBase
 
 
 class StandinInterface(InterfaceBase):

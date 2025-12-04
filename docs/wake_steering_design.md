@@ -1,6 +1,6 @@
 # Wake steering design
 
-The `whoc.design_tools.wake_steering_design` module provides various tools for the design of yaw
+The `hycon.design_tools.wake_steering_design` module provides various tools for the design of yaw
 offset lookup tables for "open-loop" wake steering. The two primary functions are `build_simple_wake_steering_lookup_table` and `build_uncertain_wake_steering_lookup_table`, both of
 which take an instantiated
 [`FlorisModel`](https://nrel.github.io/floris/_autosummary/floris.floris_model.html),
@@ -45,7 +45,7 @@ hysteresis zones or low-pass filtering the input wind directions.
 
 ___
 
-Two other wake steering-based utilities are provided in the `whoc.design_tools.wake_steering_design` module.
+Two other wake steering-based utilities are provided in the `hycon.design_tools.wake_steering_design` module.
 
 ### Finding hysteresis zones
 
@@ -83,7 +83,7 @@ ___
 ### Wake steering offset visualization
 
 Visualization tools for wake steering lookup tables are provided in the 
-`whoc.design_tools.wake_steering_visualization` module. There are currently two functions:
+`hycon.design_tools.wake_steering_visualization` module. There are currently two functions:
 
 - `plot_offsets_wswd_heatmap()` creates a heatmap of offsets by wind speed and wind direction based
 on `df_opt` for a given turbine index `turb_id`. Unless only a single TI value

@@ -1,6 +1,6 @@
 # Interfaces
 
-The `whoc.interfaces` module contains a library of interfaces for connecting 
+The `hycon.interfaces` module contains a library of interfaces for connecting 
 Hycon with various simulation platforms and other repositories. Each controller
 run will require an `interface`, which is an instantiated object of a class
 in this library. All interface classes should inherit from `InterfaceBase`, 

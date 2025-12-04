@@ -1,17 +1,17 @@
-from whoc.controllers.battery_controller import (
+from hycon.controllers.battery_controller import (
     BatteryController,
     BatteryPassthroughController,
     BatteryPriceSOCController,
 )
-from whoc.controllers.hybrid_supervisory_controller import (
+from hycon.controllers.hybrid_supervisory_controller import (
     HybridSupervisoryControllerBaseline,
     HybridSupervisoryControllerMultiRef,
 )
-from whoc.controllers.hydrogen_plant_controller import HydrogenPlantController
-from whoc.controllers.lookup_based_wake_steering_controller import LookupBasedWakeSteeringController
-from whoc.controllers.solar_passthrough_controller import SolarPassthroughController
-from whoc.controllers.wake_steering_rosco_standin import WakeSteeringROSCOStandin
-from whoc.controllers.wind_farm_power_tracking_controller import (
+from hycon.controllers.hydrogen_plant_controller import HydrogenPlantController
+from hycon.controllers.lookup_based_wake_steering_controller import LookupBasedWakeSteeringController
+from hycon.controllers.solar_passthrough_controller import SolarPassthroughController
+from hycon.controllers.wake_steering_rosco_standin import WakeSteeringROSCOStandin
+from hycon.controllers.wind_farm_power_tracking_controller import (
     WindFarmPowerDistributingController,
     WindFarmPowerTrackingController,
 )

@@ -1,13 +1,13 @@
 from hercules.hercules_model import HerculesModel
 from hercules.utilities import load_hercules_input
 from hercules.utilities_examples import prepare_output_directory
-from whoc.controllers import (
+from hycon.controllers import (
     BatteryPassthroughController,
     HybridSupervisoryControllerBaseline,
     SolarPassthroughController,
     WindFarmPowerTrackingController,
 )
-from whoc.interfaces import HerculesInterface
+from hycon.interfaces import HerculesInterface
 
 prepare_output_directory()
 

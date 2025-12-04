@@ -1,6 +1,6 @@
 import numpy as np
 
-from whoc.controllers.controller_base import ControllerBase
+from hycon.controllers.controller_base import ControllerBase
 
 # Default power setpoint in kW (meant to ensure power maximization)
 POWER_SETPOINT_DEFAULT = 1e9 

@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from hercules.python_simulators.battery import Battery
-from whoc.controllers import BatteryController
-from whoc.interfaces import HerculesBatteryInterface
+from hycon.controllers import BatteryController
+from hycon.interfaces import HerculesBatteryInterface
 
 dt = 0.5
 input_dict = {

@@ -1,4 +1,4 @@
-from whoc.interfaces.interface_base import InterfaceBase
+from hycon.interfaces.interface_base import InterfaceBase
 
 
 class Hycon_python_server(InterfaceBase):

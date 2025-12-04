@@ -7,7 +7,7 @@ a range of offset lookup tables and comparing them to one-another.
 
 import matplotlib.pyplot as plt
 from floris import FlorisModel
-from whoc.design_tools import wake_steering_design as wsd, wake_steering_visualization as wsv
+from hycon.design_tools import wake_steering_design as wsd, wake_steering_visualization as wsv
 
 floris_dict = {
     "logging": {

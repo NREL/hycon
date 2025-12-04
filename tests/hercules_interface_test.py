@@ -1,5 +1,5 @@
 import pytest
-from whoc.interfaces import HerculesInterface
+from hycon.interfaces import HerculesInterface
 
 test_hercules_dict = {
     "dt": 1,

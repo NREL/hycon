@@ -6,8 +6,8 @@ from hercules.grid.grid_utilities import (
 )
 from hercules.hercules_model import HerculesModel
 from hercules.utilities_examples import prepare_output_directory
-from whoc.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
-from whoc.interfaces import HerculesInterface
+from hycon.controllers import BatteryPriceSOCController, HybridSupervisoryControllerMultiRef
+from hycon.interfaces import HerculesInterface
 
 prepare_output_directory()
 

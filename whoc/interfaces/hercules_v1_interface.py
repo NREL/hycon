@@ -1,5 +1,5 @@
-from whoc.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_DEFAULT
-from whoc.interfaces.interface_base import InterfaceBase
+from hycon.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_DEFAULT
+from hycon.interfaces.interface_base import InterfaceBase
 
 
 class HerculesV1ADInterface(InterfaceBase):

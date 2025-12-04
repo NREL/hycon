@@ -1,6 +1,6 @@
 import numpy as np
 
-from whoc.controllers.controller_base import ControllerBase
+from hycon.controllers.controller_base import ControllerBase
 
 
 class HybridSupervisoryControllerBase(ControllerBase):

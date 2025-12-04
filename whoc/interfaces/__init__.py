@@ -1,5 +1,5 @@
-from whoc.interfaces.hercules_interface import HerculesInterface
-from whoc.interfaces.hercules_v1_interface import (
+from hycon.interfaces.hercules_interface import HerculesInterface
+from hycon.interfaces.hercules_v1_interface import (
     HerculesADInterface,
     HerculesBatteryInterface,
     HerculesHybridADInterface,
@@ -7,4 +7,4 @@ from whoc.interfaces.hercules_v1_interface import (
     HerculesV1BatteryInterface,
     HerculesV1HybridADInterface,
 )
-from whoc.interfaces.rosco_zmq_interface import ROSCO_ZMQInterface
+from hycon.interfaces.rosco_zmq_interface import ROSCO_ZMQInterface

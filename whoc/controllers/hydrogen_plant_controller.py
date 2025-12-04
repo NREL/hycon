@@ -14,7 +14,7 @@
 
 import copy
 
-from whoc.controllers.controller_base import ControllerBase
+from hycon.controllers.controller_base import ControllerBase
 
 
 class HydrogenPlantController(ControllerBase):

@@ -1,5 +1,5 @@
 import pytest
-from whoc.interfaces import (
+from hycon.interfaces import (
     HerculesV1ADInterface,
     HerculesV1BatteryInterface,
     HerculesV1HybridADInterface,

@@ -16,8 +16,8 @@ be sufficient to install Hycon (presumably, after activating your conda
 environment):
 
 ```
-git clone https://github.com/NREL/wind-hybrid-open-controller
-pip install wind-hybrid-open-controller/
+git clone https://github.com/NREL/hycon
+pip install hycon/
 ```
 
 (installation_developers)=
@@ -28,11 +28,11 @@ repository on github. You can then install Hycon (again, assuming you have
 already activated your conda environment) according to:
 
 ```
-git clone https://github.com/your-github-id/wind-hybrid-open-controller
-pip install -e "wind-hybrid-open-controller/[develop]"
+git clone https://github.com/your-github-id/hycon
+pip install -e "hycon/[develop]"
 ```
 To contribute back to the base repository 
-https://github.com/NREL/wind-hybrid-open-controller, please do the following:
+https://github.com/NREL/hycon, please do the following:
 - Create a branch from the base repository's `develop` branch on your fork 
 containing your code changes (e.g. `your-github-id:feature/your-new-feature`)
 - Open a pull request into the base repository's `NREL:develop` branch, and provide 

@@ -33,4 +33,4 @@ NLR's software record for Hycon is SWR-25-54.
 ## Documentation
 
 Documentation for Hycon, including installation instructions, can be found
-[here](https://nrel.github.io/wind-hybrid-open-controller/intro.html).
+[here](https://nrel.github.io/hycon/intro.html).

@@ -46,8 +46,8 @@ develop = [
 include = ["hycon*"]
 
 [project.urls]
-Homepage = "https://github.com/NREL/wind-hybrid-open-controller"
-Documentation = "https://nrel.github.io/wind-hybrid-open-controller/intro.html"
+Homepage = "https://github.com/NREL/hycon"
+Documentation = "https://nrel.github.io/hycon/intro.html"
 
 [coverage.run]
 # Coverage.py configuration file

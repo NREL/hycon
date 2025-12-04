@@ -5,10 +5,10 @@ from hercules.utilities import load_hercules_input
 from hercules.utilities_examples import prepare_output_directory
 from plot_outputs import plot_outputs
 from whoc.controllers import (
-    HybridSupervisoryControllerMultiRef,
-    HybridSupervisoryControllerBaseline,
-    WindFarmPowerTrackingController,
     BatteryController,
+    HybridSupervisoryControllerBaseline,
+    HybridSupervisoryControllerMultiRef,
+    WindFarmPowerTrackingController,
 )
 from whoc.interfaces import HerculesInterface
 

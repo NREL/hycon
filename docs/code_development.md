@@ -1,6 +1,6 @@
 # Code development
 To contribute to Hycon, please consider forking the main github repository,
-with the [NREL repo](https://github.com/NREL/wind-hybrid-open-controller) as an 
+with the [NLR repo](https://github.com/NREL/wind-hybrid-open-controller) as an 
 upstream remote. See the [Installation instructions](install_instructions) 
 for details about how to set up your repository as a developer.
 

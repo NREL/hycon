@@ -148,3 +148,18 @@ Total time curtailed: 8.0 hours
 to the console.
 
 The wind speed is low in the first 4 hours or so, and the turbine cannot use its full interconnect allocation. However, since the battery has a nonzero initial state of charge, the battery can make up some of the miss. The wind speed then increases and the full hourly interconnect limit is used. When the available wind exceeds the interconnect limit and the battery is available, the battery charges (shown as a negative battery power). Between hours 15 and 20, the wind speed is fluctuating around 10 m/s and the turbine alone is not fully reaching the interconnect allocation, but during periods of higher wind speeds the interconnect limit is adhered to.
+
+(examples_batterymarket)=
+## battery_market_revenue_control
+In this example, a 10MW/40MWh battery is controlled to maximize revenue from participation in the real-time energy market, following a strategy of using the
+day-ahead market to set threshold prices for charging and discharging in the real-time market.
+
+Running the simulation produces the following plot:
+![Results of battery_market_revenue_control example](
+    graphics/battery-market.png
+)
+as well printing
+```
+Real-time revenue over simulation: $6636.5
+```
+to the console.

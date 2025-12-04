@@ -148,6 +148,9 @@ def plot_outputs():
     )
     print("Real-time revenue over simulation: ${:.1f}".format(df["revenue_rt"].sum()))
 
+    return fig
+
 if __name__ == "__main__":
-    plot_outputs()
+    fig = plot_outputs()
+    # fig.savefig("../../docs/graphics/battery-market.png", dpi=300, format="png")
     plt.show()

@@ -1,6 +1,6 @@
 """
 This script is not run as part of the main simulation procedure, but demonstrates
-various capabilities of the wake_steering_design toolbox in WHOC by designing
+various capabilities of the wake_steering_design toolbox in Hycon by designing
 a range of offset lookup tables and comparing them to one-another.
 """
 

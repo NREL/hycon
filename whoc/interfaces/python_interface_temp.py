@@ -1,7 +1,7 @@
 from whoc.interfaces.interface_base import InterfaceBase
 
 
-class WHOC_python_server(InterfaceBase):
+class Hycon_python_server(InterfaceBase):
     def __init__():
         pass
 

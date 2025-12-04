@@ -129,7 +129,7 @@ significant as the simulation progresses.
 
 (examples_windhydrogen)=
 ## wind_hydrogen_tracking
-Example of wind and hydrogen using WHOC for control is now available in the
+Example of wind and hydrogen using Hycon for control is now available in the
 Hercules repository.
 
 (examples_flexibleinterconnect)=

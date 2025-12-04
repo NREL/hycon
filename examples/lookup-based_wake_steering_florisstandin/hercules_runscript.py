@@ -4,9 +4,9 @@ import pandas as pd
 from hercules.emulator import Emulator
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
-from whoc.controllers.lookup_based_wake_steering_controller import LookupBasedWakeSteeringController
-from whoc.design_tools.wake_steering_design import compute_hysteresis_zones
-from whoc.interfaces.hercules_actuator_disk_interface import HerculesADInterface
+from hycon.controllers import LookupBasedWakeSteeringController
+from hycon.design_tools.wake_steering_design import compute_hysteresis_zones
+from hycon.interfaces import HerculesADInterface
 
 input_dict = load_yaml(sys.argv[1])
 

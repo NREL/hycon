@@ -3,12 +3,12 @@ from hercules.hercules_model import HerculesModel
 from hercules.utilities import load_hercules_input
 from hercules.utilities_examples import prepare_output_directory
 from plot_outputs import plot_outputs
-from whoc.controllers import (
+from hycon.controllers import (
     HybridSupervisoryControllerMultiRef,
     WindFarmPowerDistributingController,
     WindFarmPowerTrackingController,
 )
-from whoc.interfaces import HerculesInterface
+from hycon.interfaces import HerculesInterface
 
 generate_output_plots = True
 

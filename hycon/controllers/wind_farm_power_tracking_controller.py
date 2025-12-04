@@ -1,6 +1,6 @@
 import numpy as np
 
-from whoc.controllers.controller_base import ControllerBase
+from hycon.controllers.controller_base import ControllerBase
 
 # Default power setpoint in kW (meant to ensure power maximization)
 POWER_SETPOINT_DEFAULT = 1e9 
@@ -89,7 +89,7 @@ class WindFarmPowerTrackingController(WindFarmPowerDistributingController):
         Constructor for WindFarmPowerTrackingController.
 
         Args:
-            interface: WHOC Interface object for communication with the simulation environment.
+            interface: Hycon Interface object for communication with the simulation environment.
             input_dict: Dictionary containing input parameters for the controller.
             proportional_gain: Proportional gain for the controller.
             ramp_rate_limit: Ramp rate limit for the controller (kW/s). Defaults to None.

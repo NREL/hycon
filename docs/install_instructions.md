@@ -1,8 +1,8 @@
 (installation)=
 # Installation
 
-WHOC is _not_ designed to be used as a stand-alone package. Most likely, 
-you'll want to add WHOC to an existing conda environment that contains your
+Hycon is _not_ designed to be used as a stand-alone package. Most likely, 
+you'll want to add Hycon to an existing conda environment that contains your
 simulation testbed, such as [Hercules](https://github.com/NREL/hercules). 
 For example, see the 
 [Hercules installation instructions](https://nrel.github.io/hercules/install_instructions.html)
@@ -11,8 +11,8 @@ for how to set up an appropriate conda environment.
 (installation_general_users)=
 ## General users
 
-If you intend to use WHOC, but not contribute, the following lines should
-be sufficient to install WHOC (presumably, after activating your conda 
+If you intend to use Hycon, but not contribute, the following lines should
+be sufficient to install Hycon (presumably, after activating your conda 
 environment):
 
 ```
@@ -23,8 +23,8 @@ pip install wind-hybrid-open-controller/
 (installation_developers)=
 ## Developers
 
-If you intend to contribute to WHOC, we request that your fork the WHOC 
-repository on github. You can then install WHOC (again, assuming you have 
+If you intend to contribute to Hycon, we request that your fork the Hycon 
+repository on github. You can then install Hycon (again, assuming you have 
 already activated your conda environment) according to:
 
 ```
@@ -49,7 +49,7 @@ For more information on what your pull request should contain, see
 (installation_examples)=
 ## To run examples
 
-All WHOC examples run in the [Hercules](https://github.com/NREL/hercules) simulation environment.
+All Hycon examples run in the [Hercules](https://github.com/NREL/hercules) simulation environment.
 To run the examples, you will need to additionally install Hercules. See the 
 [Hercules installation instructions](https://nrel.github.io/hercules/install_instructions.html)
 for details.

@@ -24,7 +24,7 @@ def plot_offsets_wdws_heatmap(
     Produces a heat map of the offsets for all wind directions and
     wind speeds for turbine specified by turb_id. df_opt is assumed
     to be in the form produced by FLORIS yaw optimization routines (or
-    functions in WHOC's wake_steering_design module).
+    functions in Hycon's wake_steering_design module).
 
     Args:
         df_opt (pd.DataFrame): dataframe with offsets

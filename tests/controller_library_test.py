@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 # import pandas as pd
-from whoc.controllers import (
+from hycon.controllers import (
     BatteryController,
     BatteryPassthroughController,
     HybridSupervisoryControllerBaseline,
@@ -16,14 +16,14 @@ from whoc.controllers import (
     WindFarmPowerDistributingController,
     WindFarmPowerTrackingController,
 )
-from whoc.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_DEFAULT
-from whoc.interfaces import (
+from hycon.controllers.wind_farm_power_tracking_controller import POWER_SETPOINT_DEFAULT
+from hycon.interfaces import (
     HerculesADInterface,
     HerculesBatteryInterface,
     HerculesHybridADInterface,
     HerculesInterface,
 )
-from whoc.interfaces.interface_base import InterfaceBase
+from hycon.interfaces.interface_base import InterfaceBase
 
 
 class StandinInterface(InterfaceBase):

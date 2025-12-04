@@ -1,6 +1,6 @@
 # Controllers
 
-The `whoc.controllers` module contains a library of wind and hybrid power plant
+The `hycon.controllers` module contains a library of wind and hybrid power plant
 controllers. Each controller must inherit from `ControllerBase` (see 
 controller_base.py) and implement a
 mandatory `compute_controls()` method, which contains the relevant control 

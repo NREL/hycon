@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_180
 
-from whoc.controllers.controller_base import ControllerBase
-from whoc.design_tools.wake_steering_design import get_yaw_angles_interpolant
-from whoc.interfaces.interface_base import InterfaceBase
+from hycon.controllers.controller_base import ControllerBase
+from hycon.design_tools.wake_steering_design import get_yaw_angles_interpolant
+from hycon.interfaces.interface_base import InterfaceBase
 
 
 class LookupBasedWakeSteeringController(ControllerBase):
@@ -25,9 +25,9 @@ class LookupBasedWakeSteeringController(ControllerBase):
             interface (InterfaceBase): Interface object for communicating with the plant.
             input_dict (dict): Dictionary of input parameters.
             df_yaw (pd.DataFrame): DataFrame of yaw offsets. May be produced using tools in 
-                whoc.design_tools.wake_steering_design. Defaults to None.
+                hycon.design_tools.wake_steering_design. Defaults to None.
             hysteresis_dict (dict): Dictionary of hysteresis zones. May be produced using
-                compute_hysteresis_zones function in whoc.design_tools.wake_steering_design.
+                compute_hysteresis_zones function in hycon.design_tools.wake_steering_design.
                 Defaults to None.
             verbose (bool): Verbosity flag.
         """

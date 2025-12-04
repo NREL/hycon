@@ -5,8 +5,8 @@ from hercules import HerculesOutput
 from hercules.hercules_model import HerculesModel
 from hercules.utilities import load_hercules_input
 from hercules.utilities_examples import prepare_output_directory
-from whoc.controllers import BatteryController, HybridSupervisoryControllerMultiRef
-from whoc.interfaces import HerculesInterface
+from hycon.controllers import BatteryController, HybridSupervisoryControllerMultiRef
+from hycon.interfaces import HerculesInterface
 
 prepare_output_directory()
 

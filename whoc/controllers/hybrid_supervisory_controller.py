@@ -137,10 +137,6 @@ class HybridSupervisoryControllerBaseline(HybridSupervisoryControllerBase):
         wind_power = (1-a)*self.prev_wind_power + a*wind_power
         solar_power = (1-a)*self.prev_solar_power + a*solar_power
 
-        # Temporary print statements (note that negative battery indicates discharging)
-        print("Measured powers (wind, solar, battery):", wind_power, solar_power, battery_power)
-        print("Reference power:", plant_power_reference)
-
         # Calculate battery reference value
         if self._has_battery_controller:
             battery_reference = plant_power_reference - (wind_power + solar_power)
@@ -191,11 +187,6 @@ class HybridSupervisoryControllerBaseline(HybridSupervisoryControllerBase):
             wind_reference = 0
         if not self._has_solar_controller:
             solar_reference = 0
-
-        print(
-            "Power reference values (wind, solar, battery)",
-            wind_reference, solar_reference, battery_reference
-        )
 
         self.prev_solar_power = solar_power
         self.prev_wind_power = wind_power
@@ -272,7 +263,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
         # Extract measurements sent
         if self._has_wind_controller:
             wind_power = np.array(measurements_dict["wind_farm"]["turbine_powers"]).sum()
-            wind_reference = measurements_dict["wind_farm"]["power_reference"]
+            wind_reference = measurements_dict["wind_farm"].get(
+                "power_reference", self.plant_parameters["wind_farm"]["capacity"]
+            )
             wind_reference = np.minimum(
                 wind_reference,
                 self.plant_parameters["wind_farm"]["capacity"]
@@ -283,7 +276,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
 
         if self._has_solar_controller:
             solar_power = measurements_dict["solar_farm"]["power"]
-            solar_reference = measurements_dict["solar_farm"]["power_reference"]
+            solar_reference = measurements_dict["solar_farm"].get(
+                "power_reference", self.plant_parameters["solar_farm"]["capacity"]
+            )
             solar_reference = np.minimum(
                 solar_reference, self.plant_parameters["solar_farm"]["capacity"]
             )
@@ -294,7 +289,9 @@ class HybridSupervisoryControllerMultiRef(HybridSupervisoryControllerBase):
         if self._has_battery_controller:
             battery_power = measurements_dict["battery"]["power"]
             if "power_reference" in measurements_dict["battery"]:
-                battery_reference = measurements_dict["battery"]["power_reference"]
+                battery_reference = measurements_dict["battery"].get(
+                    "power_reference", 0
+                )
             else:
                 battery_reference = 0
             battery_reference = np.minimum(

@@ -1,6 +1,7 @@
 import pytest
 from hycon.interfaces import HerculesInterface
 
+
 def test_interface_instantiation(test_hercules_dict):
     """
     Tests whether all interfaces can be imported correctly and that they

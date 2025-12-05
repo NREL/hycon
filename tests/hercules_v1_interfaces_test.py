@@ -26,7 +26,9 @@ def test_HerculesADInterface(test_hercules_v1_dict):
     assert measurements["time"] == test_hercules_v1_dict["time"]
     assert (
         measurements["wind_farm"]["wind_directions"]
-        == test_hercules_v1_dict["hercules_comms"]["amr_wind"]["test_farm"]["turbine_wind_directions"]
+        == test_hercules_v1_dict["hercules_comms"]["amr_wind"]["test_farm"][
+            "turbine_wind_directions"
+        ]
     )
     assert (
         measurements["wind_farm"]["turbine_powers"]
@@ -80,9 +82,13 @@ def test_HerculesADInterface(test_hercules_v1_dict):
     # wind_power_reference takes precedence
     test_hercules_v1_dict["external_signals"]["wind_power_reference"] = 500.0
     test_hercules_v1_dict["external_signals"]["plant_power_reference"] = 400.0
-    assert interface.get_measurements(test_hercules_v1_dict)["wind_farm"]["power_reference"] == 500.0
+    assert (
+        interface.get_measurements(test_hercules_v1_dict)["wind_farm"]["power_reference"] == 500.0
+    )
     del test_hercules_v1_dict["external_signals"]["wind_power_reference"]
-    assert interface.get_measurements(test_hercules_v1_dict)["wind_farm"]["power_reference"] == 400.0
+    assert (
+        interface.get_measurements(test_hercules_v1_dict)["wind_farm"]["power_reference"] == 400.0
+    )
     # Reinstate original values for future tests
     test_hercules_v1_dict["external_signals"]["wind_power_reference"] = 1000.0
     test_hercules_v1_dict["external_signals"]["plant_power_reference"] = 1000.0

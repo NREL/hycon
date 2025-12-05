@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from floris import FlorisModel
-from whoc.design_tools.wake_steering_design import (
+from hycon.design_tools.wake_steering_design import (
     apply_static_rate_limits,
     apply_wind_speed_ramps,
     build_simple_wake_steering_lookup_table,

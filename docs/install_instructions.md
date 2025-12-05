@@ -1,8 +1,8 @@
 (installation)=
 # Installation
 
-WHOC is _not_ designed to be used as a stand-alone package. Most likely, 
-you'll want to add WHOC to an existing conda environment that contains your
+Hycon is _not_ designed to be used as a stand-alone package. Most likely, 
+you'll want to add Hycon to an existing conda environment that contains your
 simulation testbed, such as [Hercules](https://github.com/NREL/hercules). 
 For example, see the 
 [Hercules installation instructions](https://nrel.github.io/hercules/install_instructions.html)
@@ -11,28 +11,28 @@ for how to set up an appropriate conda environment.
 (installation_general_users)=
 ## General users
 
-If you intend to use WHOC, but not contribute, the following lines should
-be sufficient to install WHOC (presumably, after activating your conda 
+If you intend to use Hycon, but not contribute, the following lines should
+be sufficient to install Hycon (presumably, after activating your conda 
 environment):
 
 ```
-git clone https://github.com/NREL/wind-hybrid-open-controller
-pip install wind-hybrid-open-controller/
+git clone https://github.com/NREL/hycon
+pip install hycon/
 ```
 
 (installation_developers)=
 ## Developers
 
-If you intend to contribute to WHOC, we request that your fork the WHOC 
-repository on github. You can then install WHOC (again, assuming you have 
+If you intend to contribute to Hycon, we request that your fork the Hycon 
+repository on github. You can then install Hycon (again, assuming you have 
 already activated your conda environment) according to:
 
 ```
-git clone https://github.com/your-github-id/wind-hybrid-open-controller
-pip install -e "wind-hybrid-open-controller/[develop]"
+git clone https://github.com/your-github-id/hycon
+pip install -e "hycon/[develop]"
 ```
 To contribute back to the base repository 
-https://github.com/NREL/wind-hybrid-open-controller, please do the following:
+https://github.com/NREL/hycon, please do the following:
 - Create a branch from the base repository's `develop` branch on your fork 
 containing your code changes (e.g. `your-github-id:feature/your-new-feature`)
 - Open a pull request into the base repository's `NREL:develop` branch, and provide 
@@ -49,7 +49,7 @@ For more information on what your pull request should contain, see
 (installation_examples)=
 ## To run examples
 
-All WHOC examples run in the [Hercules](https://github.com/NREL/hercules) simulation environment.
+All Hycon examples run in the [Hercules](https://github.com/NREL/hercules) simulation environment.
 To run the examples, you will need to additionally install Hercules. See the 
 [Hercules installation instructions](https://nrel.github.io/hercules/install_instructions.html)
 for details.

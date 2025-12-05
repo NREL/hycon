@@ -1,10 +1,10 @@
 import pytest
-from whoc.interfaces import HerculesADInterface, HerculesHybridADInterface
-from whoc.interfaces.interface_base import InterfaceBase
+from hycon.interfaces import HerculesADInterface, HerculesHybridADInterface, HerculesInterface
+from hycon.interfaces.interface_base import InterfaceBase
 
 
 @pytest.fixture
-def test_hercules_dict():
+def test_hercules_v1_dict():
     return {
         "dt": 1,
         "time": 0,
@@ -38,6 +38,53 @@ def test_hercules_dict():
                             "hydrogen_reference": 0.02},
     }
 
+@pytest.fixture
+def test_hercules_dict():
+    return {
+        "dt": 1,
+        "time": 0,
+        "plant": {
+            "interconnect_limit": None
+        },
+        "controller": {
+            "test_controller_parameter": 1.0,
+        },
+        "wind_farm": {
+            "n_turbines": 2,
+            "capacity": 10000.0,
+            "wind_direction_mean": 271.0,
+            "turbine_powers": [4000.0, 4001.0],
+            "wind_speed": 10.0,
+        },
+        "solar_farm": {
+            "capacity": 1000.0,
+            "power": 1000.0, # kW
+            "dni": 1000.0,
+            "aoi": 30.0,
+        },
+        "battery": {
+            "size": 10.0e3,
+            "energy_capacity": 40.0e3,
+            "power": 10.0e3,
+            "soc": 0.3,
+            "charge_rate": 20e3,
+            "discharge_rate": 15e3,
+        },
+        "electrolyzer": {
+            "H2_mfr": 0.03,
+        },
+        "external_signals": {
+            "wind_power_reference": 1000.0,
+            "solar_power_reference": 800.0,
+            "battery_power_reference": 0.0,
+            "plant_power_reference": 1000.0,
+            "forecast_ws_mean_0": 8.0,
+            "forecast_ws_mean_1": 8.1,
+            "ws_median_0": 8.1,
+            "hydrogen_reference": 0.02,
+        },
+    }
+
 class StandinInterface(InterfaceBase):
     """
     Empty class to test controllers.
@@ -45,6 +92,10 @@ class StandinInterface(InterfaceBase):
 
     def __init__(self):
         super().__init__()
+        self.dt = 1.0
+        # Set up stand-in plant parameters and controller parameters
+        self.plant_parameters = {"n_turbines": 2}
+        self.controller_parameters = {}
 
     def get_measurements(self):
         pass
@@ -60,20 +111,27 @@ def test_interface_standin():
     return StandinInterface()
 
 @pytest.fixture
-def test_interface_hercules_ad(test_hercules_dict):
+def test_interface_hercules(test_hercules_dict):
+    """
+    Fixture to create a Hercules v2 dictionary for testing.
+    """
+    return HerculesInterface(test_hercules_dict)
+
+@pytest.fixture
+def test_interface_hercules_ad(test_hercules_v1_dict):
     """
     Fixture to create a HerculesADInterface for testing.
     """
-    return HerculesADInterface(test_hercules_dict)
+    return HerculesADInterface(test_hercules_v1_dict)
 
 @pytest.fixture
-def test_interface_hercules_hybrid_ad(test_hercules_dict):
+def test_interface_hercules_hybrid_ad(test_hercules_v1_dict):
     """
     Fixture to create a HerculesHybridADInterface for testing.
     """
-    test_hercules_dict["controller"]["num_batteries"] = 1
-    test_hercules_dict["controller"]["num_solar"] = 1
-    return HerculesHybridADInterface(test_hercules_dict)
+    test_hercules_v1_dict["controller"]["num_batteries"] = 1
+    test_hercules_v1_dict["controller"]["num_solar"] = 1
+    return HerculesHybridADInterface(test_hercules_v1_dict)
 
 @pytest.fixture
 def floris_dict():

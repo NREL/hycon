@@ -1,13 +1,13 @@
 """
 This script is not run as part of the main simulation procedure, but demonstrates
-various capabilities of the wake_steering_design toolbox in WHOC by designing
+various capabilities of the wake_steering_design toolbox in Hycon by designing
 a range of offset lookup tables and comparing them to one-another.
 """
 
 
 import matplotlib.pyplot as plt
 from floris import FlorisModel
-from whoc.design_tools import wake_steering_design as wsd, wake_steering_visualization as wsv
+from hycon.design_tools import wake_steering_design as wsd, wake_steering_visualization as wsv
 
 floris_dict = {
     "logging": {

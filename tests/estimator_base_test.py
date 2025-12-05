@@ -1,5 +1,5 @@
 import pytest
-from whoc.estimators.estimator_base import EstimatorBase
+from hycon.estimators.estimator_base import EstimatorBase
 
 
 class InheritanceTestClassBad(EstimatorBase):
